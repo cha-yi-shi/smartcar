@@ -114,7 +114,7 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
-#define FORCE_START_TICK  1000     /* ?? 1000×5ms = 5000 毫秒（5 秒）开始进环 */
+#define FORCE_START_TICK  1060     /* ?? 1060×5ms = 5300 毫秒（5.3 秒）开始进环 */
 #define FORCE_TIME_TICK    240     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
 #define FORCE_DUTY         400     /* ?? 打角 duty（650=中位，越小越左） */
 
