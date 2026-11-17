@@ -185,6 +185,14 @@ void TM4_Isr() interrupt 20
     /* ④ 方向环 → 舵机（用上面选好的 PID） */
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
+
+    /* ===== 临时：按时间强制左打（圆环闭环已停用） =====
+       上电后 8 秒开始，固定左打 1.2 秒，之后交回差比和 */
+    if((run_tick >= FORCE_START_TICK) &&
+       (run_tick <  (FORCE_START_TICK + FORCE_TIME_TICK)))
+    {
+        Set_Servo_PWM((int32)FORCE_DUTY);
+    }
         /* 临时：跳过 PID，把偏差放大 2 倍直接打舵 */
    // Set_Servo_PWM((int32)(SERVO_MID - (int32)(error * 2)));
     /* ⑤ 读编码器 → 速度环 → 电机 */
