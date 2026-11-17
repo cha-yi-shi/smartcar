@@ -39,8 +39,8 @@
 #define TARGET_DUTY_DEFAULT     -8000       /* ?? 开环占空比 0~10000（想跑就改成 3000 左右） */
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
-#define SPEED_LOOP_ENABLE       0       /* 1 = 速度环闭环（已加"禁止反转"） */
-#define ELEM_ENABLE             1       /* 0 = 元素功能先关掉（调试阶段）  1 = 打开十字/环岛（L6 6.4） */
+#define SPEED_LOOP_ENABLE       1       /* 1 = 速度环闭环（已加"禁止反转"） */
+#define ELEM_ENABLE             0       /* 0 = 元素功能先关掉（调试阶段）  1 = 打开十字/环岛（L6 6.4） */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
@@ -75,7 +75,7 @@
 #define SPEED_E_ON         35   /* ?? |error| > 18 → 判定进弯，减速 */
 #define SPEED_DE_ON        10   /* ?? |Δerror| > 10 → 急弯特征，更早减速 */
 #define SPEED_E_OFF        30   /* ?? |error| < 10 → 认为出弯（回差，防抖） */
-#define SPEED_HOLD          8   /* ?? 出弯后要连续 8 个周期(80ms) 才恢复满速 */
+#define SPEED_HOLD         16   /* 8→16：连续 16 个周期(80ms) —— 周期改成 5ms 后翻倍 */
 
 /* 出弯提前退出：偏差正在快速回零时立刻切回直道 KP（消除出弯打角过大） */
 #define SPEED_E_BACK      30   /* ?? |error| 已回落到 30 以下 */
@@ -100,13 +100,13 @@
 #define RING_H_TH       175     /* ?? 横向：(LX + RX) > 此值（直道约 70，切点约 178） */
 #define RING_V_TH        1
 /* ?? 竖向：(LY + RY) > 此值（直道约 0，需要你实测） */
-#define RING_COUNT        5     /* 连续 5 个 10ms（50ms）确认 */
-#define RING_DELAY        2      /* ?? 确认后再延时多久才打角（20×10ms = 0.2 秒）——治"打角太早" */
-#define RING_IN_MIN      160     /* ?? 进环强制打角【至少】持续 40×10ms = 0.4 秒（最重要的参数） */
-#define RING_IN_MAX     640     /* ?? 进环强制打角【最多】持续 1.2 秒（防止一直打角） */
-#define RING_ON_MIN     500     /* ?? 环内至少 0.5 秒，才允许判"到出环口" */
-#define RING_TIMEOUT    640     /* ?? 兜底：环内最多 6.4 秒，超时强制出环 */
-#define RING_OUT_TIME    100     /* ?? 出环：强制右打 0.4 秒 */
+#define RING_COUNT        10     /* 5→10：连续 50ms —— 周期改成 5ms 后翻倍 */
+#define RING_DELAY         4     /* 2→4：延时 20ms */
+#define RING_IN_MIN       320     /* 160→320：进环至少 1.6 秒 */
+#define RING_IN_MAX      1280     /* 640→1280：进环最多 6.4 秒 */
+#define RING_ON_MIN      1000     /* 500→1000：环内至少 5 秒 */
+#define RING_TIMEOUT     1280     /* 640→1280：兜底 6.4 秒 */
+#define RING_OUT_TIME     200     /* 100→200：出环强制右打 1 秒 */
 #define RING_OUT_BIAS     -20     /* 出环打角（负数 = 往右） */
 #define RING_BIAS        100     /* 进环打角（正数 = 往左） */
 
