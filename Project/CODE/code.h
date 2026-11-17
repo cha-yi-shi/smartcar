@@ -51,7 +51,7 @@
 #define SERVO_MAX_OUT   400.0f
 
 /* 弯道专用 PID（直道用上面的 SERVO_KP/KI/KD） */
-#define KP_CURVE        2.5f    /* ?? 弯道 Kp（直道 2.5 的 1.4 倍，弯道打角更狠） */
+#define KP_CURVE        3.5f    /* ?? 弯道 Kp（直道 2.5 的 1.4 倍，弯道打角更狠） */
 #define KI_CURVE        0.0f
 #define KD_CURVE        4.0f
 

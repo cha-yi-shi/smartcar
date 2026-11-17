@@ -322,7 +322,9 @@ int16 speed_decide(int16 e)
     }
 #endif
 
-    /* ===== 直道 / 弯道 两套 PID ===== */
+    /* ===== 弯道 PID 已注释（停用）：一律使用直道 PID =====
+       speed_slowed 仍会计算，但不再影响 PID 参数
+    #if 0
     if(speed_slowed != pid_state_prev)
     {
         servo_pid.integral = 0;
@@ -341,6 +343,11 @@ int16 speed_decide(int16 e)
         servo_pid.ki = SERVO_KI;
         servo_pid.kd = SERVO_KD;
     }
+    #endif
+    ===== 弯道 PID 注释结束 ===== */
 
+    servo_pid.kp = SERVO_KP;
+    servo_pid.ki = SERVO_KI;
+    servo_pid.kd = SERVO_KD;
     return SPEED_STRAIGHT;             /* 开环时固定满占空比（不再减速） */
 }
