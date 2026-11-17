@@ -152,7 +152,7 @@ void TM3_Isr() interrupt 19
 }
 
 /*-------------------------------------------------------------------------------------------------------------------
- *  TM4：10ms 控制周期（L6 6.5.1）
+ *  TM4：5ms 控制周期（电感每 5ms 读一次）
  *      ① 采电感 → 滤波 → 归一化      （L4 4.4 ~ 4.5）
  *      ② 差比和 → 偏差 error          （L4 4.6）
  *      ③ 元素状态机修正 error         （L6 6.4）
@@ -175,7 +175,7 @@ void TM4_Isr() interrupt 20
     error = calc_error(lh, rh);
 
     /* ③ 元素状态机修正（ELEM_ENABLE = 0 时什么都不做） */
-    elem_check(raw_lx, raw_rx, raw_ly, raw_ry);   /* 圆环判定改用【原始值】 */
+    elem_check(lh, rh, lv, rv);                   /* 圆环：四路和触发 */
     error = elem_correct(error);
 
 
@@ -186,13 +186,12 @@ void TM4_Isr() interrupt 20
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
 
-    /* ===== 按时间开环进环：7.5 秒开始，固定左打 1.2 秒，之后交回差比和 ===== */
+    /* ===== 圆环开环：到点强制左打，之后交回差比和 ===== */
     if((run_tick >= FORCE_START_TICK) &&
        (run_tick <  (FORCE_START_TICK + FORCE_TIME_TICK)))
     {
         Set_Servo_PWM((int32)FORCE_DUTY);
     }
-
         /* 临时：跳过 PID，把偏差放大 2 倍直接打舵 */
    // Set_Servo_PWM((int32)(SERVO_MID - (int32)(error * 2)));
     /* ⑤ 读编码器 → 速度环 → 电机 */
@@ -223,8 +222,8 @@ void TM4_Isr() interrupt 20
     /* 开环：基础占空比 ± 差速 */
     {
         int16 d_l, d_r;
-        d_l = (int16)(speed_now + duty_diff);      /* 内侧轮：|占空比|变小 = 减速 */
-        d_r = (int16)(speed_now - duty_diff);      /* 外侧轮：|占空比|变大 = 加速 */
+        d_l = (int16)(speed_now - duty_diff);      /* E>0 → 左轮快 */
+        d_r = (int16)(speed_now + duty_diff);      /* E>0 → 右轮慢 */
         if(d_l >  10000) d_l =  10000;
         if(d_l < -10000) d_l = -10000;
         if(d_r >  10000) d_r =  10000;

@@ -90,7 +90,7 @@ void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
     uint16 sum_v;                      /* 竖向电感和：LY + RY */
     uint8  h_flag;                     /* 横向达标 */
     uint8  v_flag;                     /* 竖向达标 */
-    uint8  both_flag;                  /* 横向达标 且 竖向小于阈值 = 检测到 */
+    uint8  both_flag;                  /* 两者同时达标 = 检测到"阈值" */
 
     if(run_tick < 60000)  run_tick++;
 
@@ -98,7 +98,7 @@ void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
     sum_v = (uint16)(lv_now + rv_now);
 
     h_flag = (sum_h > RING_H_TH) ? 1 : 0;
-    v_flag = (sum_v < RING_V_MAX) ? 1 : 0;    /* 竖向要"干净"（小于 2） */
+    v_flag = (sum_v < RING_V_MAX) ? 1 : 0;    /* 竖向要"干净"（小于 10） */
 
     both_flag = (uint8)(h_flag & v_flag);      /* 必须同时达标才算数 */
 
@@ -130,6 +130,13 @@ void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
         /*------------------ ② 环内：差比和，等【第二次】检测到阈值（出环口） ------------------*/
         case ELEM_ROUND_ON:
             elem_timer++;
+            if(elem_timer > RING_TIMEOUT)      /* 兜底：等太久强制出环 */
+            {
+                elem_cnt   = 0;
+                elem_state = ELEM_ROUND_OUT;
+                elem_timer = 0;
+                break;
+            }
             if((elem_timer > RING_ON_MIN) && both_flag)
             {
                 if(++elem_cnt >= RING_COUNT)
@@ -246,7 +253,6 @@ int16 speed_decide(int16 e)
     int16 ae;
     int16 diff;
     int16 diff2;                       /* 速度环用的差速（脉冲单位） */
-    int16 base_spd;                    /* 当前基础速度（直道/弯道） */
 
     de_s = (int16)(e - error_last);
     error_last = e;
@@ -298,17 +304,16 @@ int16 speed_decide(int16 e)
     diff  = (int16)(DIFF_DUTY_K * (float)e);            /* 开环用：占空比单位 */
     if(diff >  DIFF_DUTY_LIMIT)  diff =  DIFF_DUTY_LIMIT;
     if(diff < -DIFF_DUTY_LIMIT)  diff = -DIFF_DUTY_LIMIT;
-    duty_diff = diff;
+    /* 差速死区：偏差太小就不差速，保证直道满速 */
+    if((e > -DIFF_DEAD) && (e < DIFF_DEAD))  diff = 0;
 
-    /* ---- 弯道减速：直道用 TARGET_SPEED_BASE，弯道用 TARGET_SPEED_CURVE ---- */
-    if(1 == speed_slowed)  base_spd = TARGET_SPEED_CURVE;
-    else                   base_spd = TARGET_SPEED_BASE;
+    duty_diff = diff;
 
     diff2 = (int16)(DIFF_K * (float)e);                 /* 速度环用：脉冲单位 */
     if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
     if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    target_l = (int16)(base_spd + diff2);              /* 内侧：数值变大 = 慢 */
-    target_r = (int16)(base_spd - diff2);              /* 外侧：数值变小 = 快 */
+    target_l = (int16)(TARGET_SPEED_BASE + diff2);     /* 内侧：数值变大 = 慢 */
+    target_r = (int16)(TARGET_SPEED_BASE - diff2);     /* 外侧：数值变小 = 快 */
 
     /* ===== 圆环期间强制使用弯道 PID（环本身就是弯道，不受 |error| 阈值影响） ===== */
 #if (ELEM_ENABLE == 1)
@@ -320,8 +325,8 @@ int16 speed_decide(int16 e)
     }
 #endif
 
-    /* ===== 弯道 PID 已停用（暂时）：一律使用直道 PID =====
-       speed_slowed 仍然计算，但只用于"过弯减速"和"差速"，不再切换 PID
+    /* ===== 弯道 PID 已注释（停用）：一律使用直道 PID =====
+       speed_slowed 仍会计算，但不再影响 PID 参数
     #if 0
     if(speed_slowed != pid_state_prev)
     {
@@ -342,11 +347,10 @@ int16 speed_decide(int16 e)
         servo_pid.kd = SERVO_KD;
     }
     #endif
-    ===== 弯道 PID 停用结束 ===== */
+    ===== 弯道 PID 注释结束 ===== */
 
     servo_pid.kp = SERVO_KP;
     servo_pid.ki = SERVO_KI;
     servo_pid.kd = SERVO_KD;
-    if(1 == speed_slowed)  return SPEED_CURVE_DUTY;    /* 弯道减速 */
-    return SPEED_STRAIGHT;             /* 直道满占空比 */
+    return SPEED_STRAIGHT;             /* 开环时固定满占空比（不再减速） */
 }
