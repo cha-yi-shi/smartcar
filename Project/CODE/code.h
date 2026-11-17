@@ -39,7 +39,7 @@
 #define TARGET_DUTY_DEFAULT     -8000       /* ?? 开环占空比 0~10000（想跑就改成 3000 左右） */
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
-#define SPEED_LOOP_ENABLE       1       /* 1 = 速度环闭环（已加"禁止反转"） */
+#define SPEED_LOOP_ENABLE       0       /* 0 = 开环：只保留两轮占空比差速（不用速度环） */
 #define ELEM_ENABLE             0       /* 0 = 元素功能先关掉（调试阶段）  1 = 打开十字/环岛（L6 6.4） */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
@@ -68,8 +68,8 @@
 #define DIFF_DUTY_LIMIT  2500    /* ?? 最大差速（占空比）≈ 25% */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              0.1f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
-#define DIFF_LIMIT          1.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
+#define DIFF_K              2.0f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
+#define DIFF_LIMIT          5.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
 #define SPEED_E_ON         35   /* ?? |error| > 18 → 判定进弯，减速 */
