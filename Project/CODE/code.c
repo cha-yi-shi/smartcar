@@ -90,7 +90,7 @@ void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
     uint16 sum_v;                      /* 竖向电感和：LY + RY */
     uint8  h_flag;                     /* 横向达标 */
     uint8  v_flag;                     /* 竖向达标 */
-    uint8  both_flag;                  /* 两者同时达标 = 检测到"阈值" */
+    uint8  both_flag;                  /* 横向达标 且 竖向小于阈值 = 检测到 */
 
     if(run_tick < 60000)  run_tick++;
 
@@ -98,7 +98,7 @@ void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
     sum_v = (uint16)(lv_now + rv_now);
 
     h_flag = (sum_h > RING_H_TH) ? 1 : 0;
-    v_flag = (sum_v > RING_V_TH) ? 1 : 0;
+    v_flag = (sum_v < RING_V_MAX) ? 1 : 0;    /* 竖向要"干净"（小于 2） */
 
     both_flag = (uint8)(h_flag & v_flag);      /* 必须同时达标才算数 */
 
