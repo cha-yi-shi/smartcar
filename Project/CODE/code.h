@@ -68,8 +68,8 @@
 #define DIFF_DUTY_LIMIT  6000    /* ?? 最大差速（占空比）= 60%，内侧最慢可到 40% */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              1.0f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
-#define DIFF_LIMIT          5.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
+#define DIFF_K              5.0f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
+#define DIFF_LIMIT          7.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
 #define SPEED_E_ON         35   /* ?? |error| > 18 → 判定进弯，减速 */
