@@ -215,8 +215,8 @@ void TM4_Isr() interrupt 20
     /* 开环：基础占空比 ± 差速 */
     {
         int16 d_l, d_r;
-        d_l = (int16)(speed_now + duty_diff);      /* 内侧轮：|占空比|变小 = 减速 */
-        d_r = (int16)(speed_now - duty_diff);      /* 外侧轮：|占空比|变大 = 加速 */
+        d_l = (int16)(speed_now + duty_diff);      /* 左轮：往左打时左轮是外侧 → 加速 */
+        d_r = (int16)(speed_now - duty_diff);      /* 右轮：往左打时右轮是内侧 → 减速 */
         if(d_l >  10000) d_l =  10000;
         if(d_l < -10000) d_l = -10000;
         if(d_r >  10000) d_r =  10000;
