@@ -39,7 +39,7 @@
 #define TARGET_DUTY_DEFAULT     -8000       /* ?? 开环占空比 0~10000（想跑就改成 3000 左右） */
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
-#define SPEED_LOOP_ENABLE       1       /* 0 = 开环：只保留两轮占空比差速（不用速度环） */
+#define SPEED_LOOP_ENABLE       0       /* 0 = 开环：只保留两轮占空比差速（不用速度环） */
 #define ELEM_ENABLE             0       /* 0 = 元素功能先关掉（调试阶段）  1 = 打开十字/环岛（L6 6.4） */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
