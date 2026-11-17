@@ -327,7 +327,9 @@ int16 speed_decide(int16 e)
     }
 #endif
 
-    /* ===== 直道 / 弯道 两套 PID ===== */
+    /* ===== 弯道 PID 已停用（暂时）：一律使用直道 PID =====
+       speed_slowed 仍然计算，但只用于"过弯减速"和"差速"，不再切换 PID
+    #if 0
     if(speed_slowed != pid_state_prev)
     {
         servo_pid.integral = 0;
@@ -346,7 +348,12 @@ int16 speed_decide(int16 e)
         servo_pid.ki = SERVO_KI;
         servo_pid.kd = SERVO_KD;
     }
+    #endif
+    ===== 弯道 PID 停用结束 ===== */
 
+    servo_pid.kp = SERVO_KP;
+    servo_pid.ki = SERVO_KI;
+    servo_pid.kd = SERVO_KD;
     if(1 == speed_slowed)  return SPEED_CURVE_DUTY;    /* 弯道减速 */
     return SPEED_STRAIGHT;             /* 直道满占空比 */
 }

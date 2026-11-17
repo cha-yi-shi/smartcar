@@ -44,20 +44,20 @@
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        1.0f
+#define SERVO_KP        0.8f
 #define SERVO_KI        0.0f
-#define SERVO_KD        4.0f
+#define SERVO_KD        2.0f
 #define SERVO_MAX_I     100.0f
 #define SERVO_MAX_OUT   400.0f
 
 /* 弯道专用 PID（直道用上面的 SERVO_KP/KI/KD） */
-#define KP_CURVE        3.5f    /* ?? 弯道 Kp（直道 2.5 的 1.4 倍，弯道打角更狠） */
+#define KP_CURVE        4.5f    /* ?? 弯道 Kp（直道 2.5 的 1.4 倍，弯道打角更狠） */
 #define KI_CURVE        0.0f
 #define KD_CURVE        4.0f
 
 /*----------------------------- 入弯减速（竞速：直道满占空比） -----------------------------*/
 #define SPEED_STRAIGHT -10000   /* ?? 直道：满占空比（保持竞速速度） */
-#define SPEED_CURVE_DUTY -7000    /* ?? 开环时弯道占空比（?10000 → ?7000，降 30%） */
+#define SPEED_CURVE_DUTY -6000    /* ?? 开环时弯道占空比（?10000 → ?7000，降 30%） */
 
 /*----------------------------- 两轮差速（给在速度环 PID 的目标值上） -----------------------------*/
 #define TARGET_SPEED_BASE  -15     /* ?? 基础目标速度：满速 15 的 80% */
@@ -70,13 +70,13 @@
 #define DIFF_DUTY_LIMIT  2500    /* ?? 最大差速（占空比）≈ 25% */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              1.0f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
-#define DIFF_LIMIT          5.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
+#define DIFF_K              0.3f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
+#define DIFF_LIMIT          3.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
 
 #define SPEED_E_ON         50   /* ?? |error| > 18 → 判定进弯，减速 */
 #define SPEED_DE_ON        10   /* ?? |Δerror| > 10 → 急弯特征，更早减速 */
 #define SPEED_E_OFF        40   /* ?? |error| < 10 → 认为出弯（回差，防抖） */
-#define SPEED_HOLD          8   /* ?? 出弯后要连续 8 个周期(80ms) 才恢复满速 */
+#define SPEED_HOLD         20   /* ?? 出弯后要连续 8 个周期(80ms) 才恢复满速 */
 
 /* 出弯提前退出：偏差正在快速回零时立刻切回直道 KP（消除出弯打角过大） */
 #define SPEED_E_BACK      30   /* ?? |error| 已回落到 30 以下 */
