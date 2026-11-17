@@ -40,7 +40,7 @@
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
 #define SPEED_LOOP_ENABLE       0       /* 1 = 速度环闭环（已加"禁止反转"） */
-#define ELEM_ENABLE             0       /* ?? 0 = 圆环闭环已停用（改为按时间强制打角） */
+#define ELEM_ENABLE             1       /* 1 = 圆环闭环状态机已恢复 */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
@@ -114,7 +114,8 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 临时：按时间强制左打（替代圆环闭环状态机） -------------------*/
-#define FORCE_START_TICK   800     /* ?? 上电后 800×10ms = 8.0 秒开始打角 */
+/* 以下三个是"按时间强制打角"的参数，已停用（保留备查）
+#define FORCE_START_TICK   750     /* ?? 上电后 800×10ms = 8.0 秒开始打角 */
 #define FORCE_TIME_TICK    120     /* ?? 持续 120×10ms = 1.2 秒 */
 #define FORCE_DUTY         400     /* ?? 强制打角时的舵机 duty（650=中位，越小越左） */
 
