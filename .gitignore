@@ -1,0 +1,24 @@
+# ================= 编译产物 =================
+Project/MDK/Out_File/
+Project/MDK/Listings/
+Project/MDK/Objects/
+*.lst
+*.obj
+*.hex
+*.map
+*.crf
+*.lnp
+*.axf
+*.dep
+*.build_log.htm
+*.uvguix.*
+
+# ================= 备份文件 =================
+*.bak_*
+*.bak
+
+# ================= 系统 / 编辑器 =================
+Thumbs.db
+desktop.ini
+.DS_Store
+.merkle-snapshot.json
