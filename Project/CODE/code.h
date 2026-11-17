@@ -44,7 +44,7 @@
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        1.0f
+#define SERVO_KP        2.5f
 #define SERVO_KI        0.0f
 #define SERVO_KD        4.0f
 #define SERVO_MAX_I     100.0f
@@ -64,12 +64,12 @@
 #define SPEED_NO_REVERSE    1       /* ?? 1 = 禁止电机反转：超过目标速度就断油到 0，不准反向 */
 #define DEAD_SPEED          1       /* ?? 速度死区（脉冲/10ms）：±1 内不调节 */
 
-#define DIFF_DUTY_K      20      /* ?? 开环差速系数：error=40 → 左右占空比差 ±800（8%） */
-#define DIFF_DUTY_LIMIT  2500    /* ?? 最大差速（占空比）≈ 25% */
+#define DIFF_DUTY_K     100      /* ?? 开环差速系数：error=40 → 左右占空比差 ±4000（40%） */
+#define DIFF_DUTY_LIMIT  6000    /* ?? 最大差速（占空比）= 60%，内侧最慢可到 40% */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              2.0f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
-#define DIFF_LIMIT          5.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
+#define DIFF_K              5.0f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
+#define DIFF_LIMIT          10.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
 #define SPEED_E_ON         35   /* ?? |error| > 18 → 判定进弯，减速 */
