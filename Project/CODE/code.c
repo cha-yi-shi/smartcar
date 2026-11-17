@@ -304,6 +304,9 @@ int16 speed_decide(int16 e)
     diff  = (int16)(DIFF_DUTY_K * (float)e);            /* 开环用：占空比单位 */
     if(diff >  DIFF_DUTY_LIMIT)  diff =  DIFF_DUTY_LIMIT;
     if(diff < -DIFF_DUTY_LIMIT)  diff = -DIFF_DUTY_LIMIT;
+    /* 差速死区：偏差太小就不差速，保证直道满速 */
+    if((e > -DIFF_DEAD) && (e < DIFF_DEAD))  diff = 0;
+
     duty_diff = diff;
 
     diff2 = (int16)(DIFF_K * (float)e);                 /* 速度环用：脉冲单位 */
