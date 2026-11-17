@@ -253,6 +253,7 @@ int16 speed_decide(int16 e)
     int16 ae;
     int16 diff;
     int16 diff2;                       /* 速度环用的差速（脉冲单位） */
+    int16 base_spd;                    /* 当前基础速度（直道/弯道） */
 
     de_s = (int16)(e - error_last);
     error_last = e;
@@ -306,11 +307,15 @@ int16 speed_decide(int16 e)
     if(diff < -DIFF_DUTY_LIMIT)  diff = -DIFF_DUTY_LIMIT;
     duty_diff = diff;
 
+    /* ---- 弯道减速：直道用 TARGET_SPEED_BASE，弯道用 TARGET_SPEED_CURVE ---- */
+    if(1 == speed_slowed)  base_spd = TARGET_SPEED_CURVE;
+    else                   base_spd = TARGET_SPEED_BASE;
+
     diff2 = (int16)(DIFF_K * (float)e);                 /* 速度环用：脉冲单位 */
     if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
     if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    target_l = (int16)(TARGET_SPEED_BASE + diff2);     /* 内侧：数值变大 = 慢 */
-    target_r = (int16)(TARGET_SPEED_BASE - diff2);     /* 外侧：数值变小 = 快 */
+    target_l = (int16)(base_spd + diff2);              /* 内侧：数值变大 = 慢 */
+    target_r = (int16)(base_spd - diff2);              /* 外侧：数值变小 = 快 */
 
     /* ===== 圆环期间强制使用弯道 PID（环本身就是弯道，不受 |error| 阈值影响） ===== */
 #if (ELEM_ENABLE == 1)
@@ -342,5 +347,6 @@ int16 speed_decide(int16 e)
         servo_pid.kd = SERVO_KD;
     }
 
-    return SPEED_STRAIGHT;             /* 开环时固定满占空比（不再减速） */
+    if(1 == speed_slowed)  return SPEED_CURVE_DUTY;    /* 弯道减速 */
+    return SPEED_STRAIGHT;             /* 直道满占空比 */
 }
