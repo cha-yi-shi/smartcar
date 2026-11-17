@@ -130,13 +130,6 @@ void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
         /*------------------ ② 环内：差比和，等【第二次】检测到阈值（出环口） ------------------*/
         case ELEM_ROUND_ON:
             elem_timer++;
-            if(elem_timer > RING_TIMEOUT)      /* 兜底：等太久强制出环 */
-            {
-                elem_cnt   = 0;
-                elem_state = ELEM_ROUND_OUT;
-                elem_timer = 0;
-                break;
-            }
             if((elem_timer > RING_ON_MIN) && both_flag)
             {
                 if(++elem_cnt >= RING_COUNT)
