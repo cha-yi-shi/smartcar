@@ -98,7 +98,7 @@ void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
     sum_v = (uint16)(lv_now + rv_now);
 
     h_flag = (sum_h > RING_H_TH) ? 1 : 0;
-    v_flag = (sum_v > RING_V_TH) ? 1 : 0;
+    v_flag = (sum_v < RING_V_MAX) ? 1 : 0;    /* 竖向要"干净"（小于 10） */
 
     both_flag = (uint8)(h_flag & v_flag);      /* 必须同时达标才算数 */
 
