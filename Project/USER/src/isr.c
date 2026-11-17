@@ -175,7 +175,7 @@ void TM4_Isr() interrupt 20
     error = calc_error(lh, rh);
 
     /* ③ 元素状态机修正（ELEM_ENABLE = 0 时什么都不做） */
-    elem_check(lh, rh, lv, rv);                   /* 圆环：四路和触发 */
+    elem_check(raw_lx, raw_rx, raw_ly, raw_ry);   /* 圆环判定改用【原始值】 */
     error = elem_correct(error);
 
 
