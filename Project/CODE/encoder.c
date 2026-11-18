@@ -1,7 +1,7 @@
 #include "encoder.h"
 
-int32 encoder1,encoder2;
-int32 cnt1,cnt2;
+volatile int32 encoder1, encoder2;      /* 中断和主控共享，必须 volatile */
+volatile int32 cnt1, cnt2;              /* INT2/INT3 里累加，必须 volatile */
 int temp_EX=0;//实例变量（文档教学）
 
 
@@ -37,17 +37,22 @@ void encoder_init(encoder_index_enum encoder_n)
 
 int32 encoder_get_count(encoder_index_enum encoder_n,uint8 reversal)
 {
-	if(encoder_n == ENCODER1)
-	{
-		encoder1 = cnt1;
-		cnt1 = 0;
-		return (reversal?(-encoder1):encoder1);
-	}
-	if(encoder_n == ENCODER2)
-	{
-		encoder2 = cnt2;
-		cnt2 = 0;
-		return (reversal?(-encoder2):encoder2);
-	}
-	return 0;
+    /* 临界区：INT2/INT3 优先级高于 TM4，读+清零之间必须关中断，否则丢脉冲 */
+    if(encoder_n == ENCODER1)
+    {
+        EX2 = 0;
+        encoder1 = cnt1;
+        cnt1 = 0;
+        EX2 = 1;
+        return (reversal?(-encoder1):encoder1);
+    }
+    if(encoder_n == ENCODER2)
+    {
+        EX3 = 0;
+        encoder2 = cnt2;
+        cnt2 = 0;
+        EX3 = 1;
+        return (reversal?(-encoder2):encoder2);
+    }
+    return 0;
 }
