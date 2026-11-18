@@ -244,6 +244,8 @@ int16 duty_diff      = 0;           /* 开环差速量（占空比，正 = 左轮慢） */
 int16 enc_acc_l     = 0;           /* 速度环 20ms 累加：左轮脉冲 */
 int16 enc_acc_r     = 0;           /* 速度环 20ms 累加：右轮脉冲 */
 uint8 spd_div       = 0;           /* 速度环分频计数 */
+int32 total_l       = 0;           /* 左轮累计脉冲（路程） */
+int32 total_r       = 0;           /* 右轮累计脉冲 */
 uint8 speed_slowed   = 0;           /* 0 = 满速  1 = 已减速 */
 uint8 speed_slow_cnt = 0;           /* 出弯计数 */
 uint8 pid_state_prev = 0;           /* 上一周期用的是哪套 PID（0 直道 / 1 弯道） */

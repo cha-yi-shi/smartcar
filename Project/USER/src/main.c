@@ -112,6 +112,9 @@ void main()
         sprintf(txt,"D:%d V:%d      ",duty_diff,speed_now);
         lcd_showstr(0,8,(int8 *)txt);
 
+        sprintf(txt,"P:%ld R:%ld      ",total_l,total_r);
+        lcd_showstr(0,9,(int8 *)txt);
+
         delay_ms(1);
     }
 }

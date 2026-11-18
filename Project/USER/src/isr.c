@@ -187,11 +187,13 @@ void TM4_Isr() interrupt 20
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
 
     /* ===== 圆环开环：到点强制左打，之后交回差比和 ===== */
+    #if (RING_FORCE_ENABLE == 1)
     if((run_tick >= FORCE_START_TICK) &&
        (run_tick <  (FORCE_START_TICK + FORCE_TIME_TICK)))
     {
         Set_Servo_PWM((int32)FORCE_DUTY);
     }
+    #endif
         /* 临时：跳过 PID，把偏差放大 2 倍直接打舵 */
    // Set_Servo_PWM((int32)(SERVO_MID - (int32)(error * 2)));
     /* ⑤ 读编码器 → 速度环 → 电机 */
@@ -199,6 +201,10 @@ void TM4_Isr() interrupt 20
     speed_r = (int16)encoder_get_count(ENCODER2, 1);
     L_encoder = speed_l;
     R_encoder = speed_r;
+
+    /* 累计路程（脉冲）：用于标定"每圈多少个脉冲" */
+    total_l += speed_l;
+    total_r += speed_r;
 
 #if (SPEED_LOOP_ENABLE == 1)
     /* ===== 速度环：20ms 累加采样（分辨率×4），方向环仍是 5ms =====

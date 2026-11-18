@@ -39,7 +39,7 @@
 #define TARGET_DUTY_DEFAULT     -10000       /* ?? 开环占空比 0~10000（想跑就改成 3000 左右） */
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
-#define SPEED_LOOP_ENABLE       1       /* 1 = 速度环（20ms 累加，差速在速度环上）；改回 0 = 昨天那套开环 */
+#define SPEED_LOOP_ENABLE       0       /* 0 = 开环，占空比固定 -10000（用于标定测量） */
 #define ELEM_ENABLE             0       /* 0 = 圆环闭环关闭，改按时间开环进环 */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
@@ -115,6 +115,7 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
+#define RING_FORCE_ENABLE    0     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
 #define FORCE_START_TICK  1060     /* ?? 1060×5ms = 5300 毫秒（5.3 秒）开始进环 */
 #define FORCE_TIME_TICK    240     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
 #define FORCE_DUTY         400     /* ?? 打角 duty（650=中位，越小越左） */
@@ -147,6 +148,7 @@ extern int16 target_speed;      /* 速度环目标 */
 extern int16  target_l, target_r;   /* 左/右轮速度环目标（含差速） */
 extern int16  duty_diff;            /* 开环差速量（占空比） */
 extern int16  enc_acc_l, enc_acc_r;  /* 速度环 20ms 累加 */
+extern int32  total_l, total_r;      /* 累计脉冲（路程，用于标定每圈脉冲数） */
 extern uint8  spd_div;              /* 速度环分频计数 */
 extern int16 target_duty;       /* 开环占空比 */
 
