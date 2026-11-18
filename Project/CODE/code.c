@@ -325,8 +325,8 @@ int16 speed_decide(int16 e)
     diff2 = (int16)(DIFF_K * (float)e);                 /* 速度环用：脉冲单位 */
     if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
     if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    /* 每周期期望路程 = 目标速度(脉冲/秒) × 周期(ms) ÷ 1000 */
-    tgt_per  = (int16)(TARGET_SPEED_BASE * CTRL_PERIOD_MS / 1000);
+    /* 每周期目标路程（脉冲） → 加差速分配给左右轮 */
+    tgt_per  = TARGET_SPEED_BASE;                      /* 每周期目标路程（脉冲） */
 
     target_l = (int16)(tgt_per - diff2);               /* E>0 → 左轮快 */
     target_r = (int16)(tgt_per + diff2);               /* E>0 → 右轮慢 */
