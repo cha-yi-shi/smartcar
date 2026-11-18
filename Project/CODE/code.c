@@ -250,6 +250,9 @@ int16 avg_l         = 0;           /* 平滑速度（40ms 平均，标定用） */
 int16 avg_r         = 0;           /* 平滑速度（右） */
 int16 peak_l        = 0;           /* 峰值（满占空比标定用） */
 int16 peak_r        = 0;
+int32 avg_sum_l     = 0;           /* 平均用累加器（左） */
+int32 avg_sum_r     = 0;           /* 平均用累加器（右） */
+uint8 avg_cnt       = 0;           /* 平均采样计数 */
 uint8 speed_slowed   = 0;           /* 0 = 满速  1 = 已减速 */
 uint8 speed_slow_cnt = 0;           /* 出弯计数 */
 uint8 pid_state_prev = 0;           /* 上一周期用的是哪套 PID（0 直道 / 1 弯道） */

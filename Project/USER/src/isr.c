@@ -207,8 +207,18 @@ void TM4_Isr() interrupt 20
     total_r += speed_r;
 
     /* 平滑速度（时间常数约 8×5ms = 40ms）与峰值，用于标定 */
-    avg_l += (int16)((speed_l - avg_l) / 8);
-    avg_r += (int16)((speed_r - avg_r) / 8);
+    /* 平均：先累加 16 个样本（80ms）再除，避免整数截断误差 */
+    avg_sum_l += speed_l;
+    avg_sum_r += speed_r;
+    avg_cnt++;
+    if(avg_cnt >= 16)
+    {
+        avg_l = (int16)(avg_sum_l / 16);
+        avg_r = (int16)(avg_sum_r / 16);
+        avg_sum_l = 0;
+        avg_sum_r = 0;
+        avg_cnt = 0;
+    }
     if(speed_l < peak_l)  peak_l = speed_l;        /* 前进为负，取最负 = 最快 */
     if(speed_r < peak_r)  peak_r = speed_r;
 

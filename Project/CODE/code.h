@@ -152,6 +152,8 @@ extern int16  enc_acc_l, enc_acc_r;  /* 速度环 20ms 累加 */
 extern int32  total_l, total_r;      /* 累计脉冲（路程，用于标定每圈脉冲数） */
 extern int16  avg_l, avg_r;          /* 平滑速度（标定用） */
 extern int16  peak_l, peak_r;        /* 峰值速度（标定用） */
+extern int32  avg_sum_l, avg_sum_r;  /* 平均值累加器 */
+extern uint8  avg_cnt;              /* 平均采样计数 */
 extern uint8  spd_div;              /* 速度环分频计数 */
 extern int16 target_duty;       /* 开环占空比 */
 
