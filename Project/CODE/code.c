@@ -241,6 +241,9 @@ int16 error_last     = 0;           /* 上一周期偏差（算 Δerror 用） */
 int16 target_l       = 0;           /* 左轮速度环目标（基础速度 + 差速） */
 int16 target_r       = 0;           /* 右轮速度环目标 */
 int16 duty_diff      = 0;           /* 开环差速量（占空比，正 = 左轮慢） */
+int16 enc_acc_l     = 0;           /* 速度环 20ms 累加：左轮脉冲 */
+int16 enc_acc_r     = 0;           /* 速度环 20ms 累加：右轮脉冲 */
+uint8 spd_div       = 0;           /* 速度环分频计数 */
 uint8 speed_slowed   = 0;           /* 0 = 满速  1 = 已减速 */
 uint8 speed_slow_cnt = 0;           /* 出弯计数 */
 uint8 pid_state_prev = 0;           /* 上一周期用的是哪套 PID（0 直道 / 1 弯道） */
@@ -312,8 +315,8 @@ int16 speed_decide(int16 e)
     diff2 = (int16)(DIFF_K * (float)e);                 /* 速度环用：脉冲单位 */
     if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
     if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    target_l = (int16)(TARGET_SPEED_BASE + diff2);     /* 内侧：数值变大 = 慢 */
-    target_r = (int16)(TARGET_SPEED_BASE - diff2);     /* 外侧：数值变小 = 快 */
+    target_l = (int16)(TARGET_SPEED_BASE - diff2);     /* E>0 → 左轮快 */
+    target_r = (int16)(TARGET_SPEED_BASE + diff2);     /* E>0 → 右轮慢（与开环一致） */
 
     /* ===== 圆环期间强制使用弯道 PID（环本身就是弯道，不受 |error| 阈值影响） ===== */
 #if (ELEM_ENABLE == 1)

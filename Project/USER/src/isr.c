@@ -201,23 +201,39 @@ void TM4_Isr() interrupt 20
     R_encoder = speed_r;
 
 #if (SPEED_LOOP_ENABLE == 1)
-    /* 速度死区：|实际 ? 目标| <= DEAD_SPEED 时不调节，输出保持不变（避免一顿一顿） */
+    /* ===== 速度环：20ms 累加采样（分辨率×4），方向环仍是 5ms =====
+       每个 5ms 把脉冲累加，每 SPEED_SAMPLE_DIV 次（4 次 = 20ms）才做一次 PID
+       目标值同步放大 SPEED_SAMPLE_DIV 倍 */
+    enc_acc_l += speed_l;
+    enc_acc_r += speed_r;
+
+    spd_div++;
+    if(spd_div >= SPEED_SAMPLE_DIV)
     {
-        int16 dl, dr;
-        dl = (int16)(speed_l - target_l);
-        dr = (int16)(speed_r - target_r);
+        int16 tl, tr, dl, dr, sl, sr;
+
+        spd_div = 0;
+        sl = enc_acc_l;  enc_acc_l = 0;
+        sr = enc_acc_r;  enc_acc_r = 0;
+
+        tl = (int16)(target_l * SPEED_SAMPLE_DIV);
+        tr = (int16)(target_r * SPEED_SAMPLE_DIV);
+
+        dl = (int16)(sl - tl);
+        dr = (int16)(sr - tr);
 
         if((dl > DEAD_SPEED) || (dl < -DEAD_SPEED))
-            Incremental_PID_Calc(&left_pid,  (float)target_l, (float)speed_l);
+            Incremental_PID_Calc(&left_pid,  (float)tl, (float)sl);
         if((dr > DEAD_SPEED) || (dr < -DEAD_SPEED))
-            Incremental_PID_Calc(&right_pid, (float)target_r, (float)speed_r);
-    }
+            Incremental_PID_Calc(&right_pid, (float)tr, (float)sr);
+
 #if (SPEED_NO_REVERSE == 1)
-    /* 禁止反转：输出只能朝前进方向（本车前进 = 负占空比）；超过目标速度就断油到 0 */
-    if(left_pid.output  > 0.0f)  left_pid.output  = 0.0f;
-    if(right_pid.output > 0.0f)  right_pid.output = 0.0f;
+        /* 禁止反转：输出只能朝前进方向（负占空比） */
+        if(left_pid.output  > 0.0f)  left_pid.output  = 0.0f;
+        if(right_pid.output > 0.0f)  right_pid.output = 0.0f;
 #endif
-    Motor_Set((int)left_pid.output, (int)right_pid.output);
+        Motor_Set((int)left_pid.output, (int)right_pid.output);
+    }
 #else
     /* 开环：基础占空比 ± 差速 */
     {

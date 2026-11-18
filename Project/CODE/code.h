@@ -39,7 +39,7 @@
 #define TARGET_DUTY_DEFAULT     -10000       /* ?? 开环占空比 0~10000（想跑就改成 3000 左右） */
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
-#define SPEED_LOOP_ENABLE       0       /* 0 = 开环：只保留两轮占空比差速（不用速度环） */
+#define SPEED_LOOP_ENABLE       1       /* 1 = 速度环（20ms 累加，差速在速度环上）；改回 0 = 昨天那套开环 */
 #define ELEM_ENABLE             0       /* 0 = 圆环闭环关闭，改按时间开环进环 */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
@@ -59,18 +59,19 @@
 #define SPEED_STRAIGHT -10000   /* ?? 直道：满占空比（保持竞速速度） */
 
 /*----------------------------- 两轮差速（给在速度环 PID 的目标值上） -----------------------------*/
-#define TARGET_SPEED_BASE  -15     /* ?? 基础目标速度：满速 15 的 80% */
+#define TARGET_SPEED_BASE   -7     /* ?? 每 5ms 的目标脉冲数（满速约 7.5，留余量） */
 /* 开环差速：直接改电机占空比（不用速度环、不用编码器） */
 #define SPEED_NO_REVERSE    1       /* ?? 1 = 禁止电机反转：超过目标速度就断油到 0，不准反向 */
-#define DEAD_SPEED          1       /* ?? 速度死区（脉冲/10ms）：±1 内不调节 */
+#define DEAD_SPEED          4       /* ?? 速度死区（20ms 累加单位）：4 = 1 脉冲/5ms */
+#define SPEED_SAMPLE_DIV    4       /* ?? 速度环采样分频：4×5ms = 20ms 累加一次（分辨率×4） */
 
 #define DIFF_DUTY_K     100      /* ?? 开环差速系数：error=40 → 左右占空比差 ±4000（40%） */
 #define DIFF_DUTY_LIMIT  6000    /* ?? 最大差速（占空比）= 60%，内侧最慢可到 40% */
 #define DIFF_DEAD          10     /* ?? 差速死区：|error| < 10 不做差速，保证直道满速 */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              5.0f   /* ?? 差速系数：error 33 → diff 1；error 66 → diff 2 */
-#define DIFF_LIMIT          7.0       /* ?? 差速上限（脉冲/10ms）≈ 25% */
+#define DIFF_K              0.02f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
+#define DIFF_LIMIT          2       /* ?? 速度环差速上限：最多差 2 个脉冲（约 27%） */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
 #define SPEED_E_ON         35   /* ?? |error| > 18 → 判定进弯，减速 */
@@ -145,6 +146,8 @@ extern PID left_pid, right_pid; /* 速度环 */
 extern int16 target_speed;      /* 速度环目标 */
 extern int16  target_l, target_r;   /* 左/右轮速度环目标（含差速） */
 extern int16  duty_diff;            /* 开环差速量（占空比） */
+extern int16  enc_acc_l, enc_acc_r;  /* 速度环 20ms 累加 */
+extern uint8  spd_div;              /* 速度环分频计数 */
 extern int16 target_duty;       /* 开环占空比 */
 
 extern uint16 lh, rh, lv, rv;   /* 四路归一化结果（10ms 更新一次） */
