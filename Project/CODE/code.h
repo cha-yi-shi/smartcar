@@ -62,7 +62,7 @@
 #define TARGET_SPEED_BASE   -7     /* ?? 每 5ms 的目标脉冲数（满速约 7.5，留余量） */
 /* 开环差速：直接改电机占空比（不用速度环、不用编码器） */
 #define SPEED_NO_REVERSE    1       /* ?? 1 = 禁止电机反转：超过目标速度就断油到 0，不准反向 */
-#define DEAD_SPEED          1       /* ?? 速度死区（脉冲/5ms）：±1 内不调节 */
+#define DEAD_SPEED          4       /* ?? 速度死区（20ms 累加单位）：4 = 1 脉冲/5ms */
 #define SPEED_SAMPLE_DIV    4       /* ?? 速度环采样分频：4×5ms = 20ms 累加一次（分辨率×4） */
 
 #define DIFF_DUTY_K     100      /* ?? 开环差速系数：error=40 → 左右占空比差 ±4000（40%） */
@@ -149,6 +149,8 @@ extern int16  target_l, target_r;   /* 左/右轮速度环目标（含差速） */
 extern int16  duty_diff;            /* 开环差速量（占空比） */
 extern int16  enc_acc_l, enc_acc_r;  /* 速度环 20ms 累加 */
 extern int32  total_l, total_r;      /* 累计脉冲（路程，用于标定每圈脉冲数） */
+extern int16  avg_l, avg_r;          /* 平滑速度（标定用） */
+extern int16  peak_l, peak_r;        /* 峰值速度（标定用） */
 extern uint8  spd_div;              /* 速度环分频计数 */
 extern int16 target_duty;       /* 开环占空比 */
 

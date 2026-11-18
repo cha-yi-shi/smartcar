@@ -206,23 +206,40 @@ void TM4_Isr() interrupt 20
     total_l += speed_l;
     total_r += speed_r;
 
-#if (SPEED_LOOP_ENABLE == 1)
-    /* ===== 速度环：每 5ms 判断一次 =====
-       speed_l / speed_r 就是【这一个 5ms 周期内走的脉冲数】（路程增量）
-       与目标 target_l / target_r 比较，误差超过死区才调 PID */
-    {
-        int16 dl, dr;
+    /* 平滑速度（时间常数约 8×5ms = 40ms）与峰值，用于标定 */
+    avg_l += (int16)((speed_l - avg_l) / 8);
+    avg_r += (int16)((speed_r - avg_r) / 8);
+    if(speed_l < peak_l)  peak_l = speed_l;        /* 前进为负，取最负 = 最快 */
+    if(speed_r < peak_r)  peak_r = speed_r;
 
-        dl = (int16)(speed_l - target_l);      /* 本周期实际路程 - 目标路程 */
-        dr = (int16)(speed_r - target_r);
+#if (SPEED_LOOP_ENABLE == 1)
+    /* ===== 速度环：20ms 判断一次（4 个 5ms 周期累加） =====
+       每个 5ms 把脉冲累加，每 SPEED_SAMPLE_DIV 次才做一次 PID
+       → 分辨率从 13% 提升到 3.3% */
+    enc_acc_l += speed_l;
+    enc_acc_r += speed_r;
+
+    spd_div++;
+    if(spd_div >= SPEED_SAMPLE_DIV)
+    {
+        int16 tl, tr, dl, dr, sl, sr;
+
+        spd_div = 0;
+        sl = enc_acc_l;  enc_acc_l = 0;
+        sr = enc_acc_r;  enc_acc_r = 0;
+
+        tl = (int16)(target_l * SPEED_SAMPLE_DIV);
+        tr = (int16)(target_r * SPEED_SAMPLE_DIV);
+
+        dl = (int16)(sl - tl);
+        dr = (int16)(sr - tr);
 
         if((dl > DEAD_SPEED) || (dl < -DEAD_SPEED))
-            Incremental_PID_Calc(&left_pid,  (float)target_l, (float)speed_l);
+            Incremental_PID_Calc(&left_pid,  (float)tl, (float)sl);
         if((dr > DEAD_SPEED) || (dr < -DEAD_SPEED))
-            Incremental_PID_Calc(&right_pid, (float)target_r, (float)speed_r);
+            Incremental_PID_Calc(&right_pid, (float)tr, (float)sr);
 
 #if (SPEED_NO_REVERSE == 1)
-        /* 禁止反转：输出只能朝前进方向（负占空比） */
         if(left_pid.output  > 0.0f)  left_pid.output  = 0.0f;
         if(right_pid.output > 0.0f)  right_pid.output = 0.0f;
 #endif

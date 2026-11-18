@@ -87,7 +87,7 @@ void main()
         SW4 = P67;
 
         /* 第 3 行：累计路程（脉冲），用于标定每圈脉冲数 */
-        sprintf(txt,"T:%ld,%ld       ",total_l,total_r);
+        sprintf(txt,"A:%d,%d M:%d    ",avg_l,avg_r,peak_l);
         lcd_showstr(0,3,(int8 *)txt);
 
         /* adc 用中断里已经采好的原始值，避免主循环和中断同时操作 ADC */
