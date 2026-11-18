@@ -193,6 +193,11 @@ void TM4_Isr() interrupt 20
     {
         Set_Servo_PWM((int32)FORCE_DUTY);
     }
+    else if((run_tick >= FORCE_OUT_START) &&
+            (run_tick <  (FORCE_OUT_START + FORCE_OUT_TIME)))
+    {
+        Set_Servo_PWM((int32)FORCE_OUT_DUTY);    /* 出环强制右打 */
+    }
     #endif
         /* 临时：跳过 PID，把偏差放大 2 倍直接打舵 */
    // Set_Servo_PWM((int32)(SERVO_MID - (int32)(error * 2)));

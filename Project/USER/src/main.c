@@ -71,6 +71,7 @@ void main()
 
     while(1)
     {
+#if (LCD_DEBUG == 1)
         /* ===================== 以下 6 行完全照 CarDemo1 原样 ===================== */
         sprintf(txt,"L:%d,R:%d         ",L_encoder,R_encoder);
         lcd_showstr(0,0,(int8 *)txt);
@@ -115,5 +116,7 @@ void main()
 
 
         delay_ms(1);
+#endif
+        /* 屏幕打印已关闭：LCD_DEBUG = 0 时不执行，节省主循环时间 */
     }
 }

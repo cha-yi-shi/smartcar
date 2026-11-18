@@ -40,6 +40,7 @@
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
 #define SPEED_LOOP_ENABLE       1       /* 0 = 开环，占空比固定 -10000（用于标定测量） */
+#define LCD_DEBUG               0       /* ?? 0 = 关闭屏幕打印（提速，不占用主循环） 1 = 打开 */
 #define ELEM_ENABLE             0       /* 0 = 圆环闭环关闭，改按时间开环进环 */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
@@ -63,16 +64,16 @@
 /* #define CTRL_PERIOD_MS 5 --- 已改为直接用每周期路程，不再换算速度 */
 /* 开环差速：直接改电机占空比（不用速度环、不用编码器） */
 #define SPEED_NO_REVERSE    1       /* ?? 1 = 禁止电机反转：超过目标速度就断油到 0，不准反向 */
-#define DEAD_SPEED          4       /* ?? 速度死区（20ms 累加单位）：4 = 1 脉冲/5ms */
-#define SPEED_SAMPLE_DIV    4       /* ?? 速度环采样分频：4×5ms = 20ms 累加一次（分辨率×4） */
+#define DEAD_SPEED          1       /* ?? 速度死区（20ms 累加单位）：4 = 1 脉冲/5ms */
+#define SPEED_SAMPLE_DIV    2       /* ?? 速度环采样分频：4×5ms = 20ms 累加一次（分辨率×4） */
 
 #define DIFF_DUTY_K     100      /* ?? 开环差速系数：error=40 → 左右占空比差 ±4000（40%） */
-#define DIFF_DUTY_LIMIT  6000    /* ?? 最大差速（占空比）= 60%，内侧最慢可到 40% */
-#define DIFF_DEAD          10     /* ?? 差速死区：|error| < 10 不做差速，保证直道满速 */
+#define DIFF_DUTY_LIMIT  8000    /* ?? 最大差速（占空比）= 60%，内侧最慢可到 40% */
+#define DIFF_DEAD          20     /* ?? 差速死区：|error| < 10 不做差速，保证直道满速 */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              0.02f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
-#define DIFF_LIMIT          2       /* ?? 速度环差速上限：最多差 2 个脉冲（约 27%） */
+#define DIFF_K              0.03f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
+#define DIFF_LIMIT          3       /* ?? 速度环差速上限：最多差 2 个脉冲（约 27%） */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
 #define SPEED_E_ON         35   /* ?? |error| > 18 → 判定进弯，减速 */
@@ -89,7 +90,7 @@
 
 /*----------------------------- 速度环 PI（L5 5.3） -----------------------------*/
 #define SPEED_KP           40.0f    /* ?? 速度环阻尼 */
-#define SPEED_KI           15.0f    /* ?? 速度环主响应 */
+#define SPEED_KI           40.0f    /* ?? 速度环主响应 */
 #define SPEED_KD            0.0f
 #define SPEED_MAX_OUT      10000.0f  /* ?? 输出限幅（占空比）：12 脉冲约需 8000 */
 
@@ -116,10 +117,13 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
-#define RING_FORCE_ENABLE    0     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
-#define FORCE_START_TICK  1060     /* ?? 1060×5ms = 5300 毫秒（5.3 秒）开始进环 */
+#define RING_FORCE_ENABLE    1     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
+#define FORCE_START_TICK  1050     /* ?? 1060×5ms = 5300 毫秒（5.3 秒）开始进环 */
 #define FORCE_TIME_TICK    240     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
 #define FORCE_DUTY         400     /* ?? 打角 duty（650=中位，越小越左） */
+#define FORCE_OUT_START   1420     /* ?? 1420×5ms = 7.1 秒开始出环右打 */
+#define FORCE_OUT_TIME     160     /* ?? 160×5ms = 0.8 秒 出环右打时长 */
+#define FORCE_OUT_DUTY     900     /* ?? 出环右打 duty（650=中位，越大越右） */
 
 /*===================================================================================================================
  *  类型与变量
