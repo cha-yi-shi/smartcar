@@ -86,7 +86,8 @@ void main()
         SW3 = P66;
         SW4 = P67;
 
-        sprintf(txt,"SW: %d %d %d %d    ",SW4,SW3,SW2,SW1);
+        /* 第 3 行：累计路程（脉冲），用于标定每圈脉冲数 */
+        sprintf(txt,"T:%ld,%ld       ",total_l,total_r);
         lcd_showstr(0,3,(int8 *)txt);
 
         /* adc 用中断里已经采好的原始值，避免主循环和中断同时操作 ADC */
@@ -112,8 +113,6 @@ void main()
         sprintf(txt,"D:%d V:%d      ",duty_diff,speed_now);
         lcd_showstr(0,8,(int8 *)txt);
 
-        sprintf(txt,"P:%ld R:%ld      ",total_l,total_r);
-        lcd_showstr(0,9,(int8 *)txt);
 
         delay_ms(1);
     }
