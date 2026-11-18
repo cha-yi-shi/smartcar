@@ -118,12 +118,15 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
 #define RING_FORCE_ENABLE    1     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
-#define FORCE_START_TICK  1050     /* ?? 1060×5ms = 5300 毫秒（5.3 秒）开始进环 */
+/* 起步保持中位：上电后这段时间舵机固定在 SERVO_MID，直着起步 */
+#define FORCE_MID_TIME     200     /* ?? 200×5ms = 1.0 秒：这段时间舵机保持中位 */
+
+#define FORCE_START_TICK  1050     /* 开始进环 */
 #define FORCE_TIME_TICK    240     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
 #define FORCE_DUTY         400     /* ?? 打角 duty（650=中位，越小越左） */
-#define FORCE_OUT_START   1420     /* ?? 1420×5ms = 7.1 秒开始出环右打 */
-#define FORCE_OUT_TIME     160     /* ?? 160×5ms = 0.8 秒 出环右打时长 */
-#define FORCE_OUT_DUTY     900     /* ?? 出环右打 duty（650=中位，越大越右） */
+#define FORCE_OUT_START   1028     /* 开始出环 */
+#define FORCE_OUT_TIME     160     /* ?? 160×5ms = 0.8 秒 出环时长 */
+#define FORCE_OUT_DUTY     500     /* ?? 出环duty（650=中位，越大越右） */
 
 /*===================================================================================================================
  *  类型与变量

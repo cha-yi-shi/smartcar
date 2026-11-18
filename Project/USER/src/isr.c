@@ -186,6 +186,12 @@ void TM4_Isr() interrupt 20
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
 
+    /* ===== 起步保持中位：0 ~ FORCE_MID_TIME 之间舵机固定中位 ===== */
+    if(run_tick < FORCE_MID_TIME)
+    {
+        Set_Servo_PWM((int32)SERVO_MID);
+    }
+
     /* ===== 圆环开环：到点强制左打，之后交回差比和 ===== */
     #if (RING_FORCE_ENABLE == 1)
     if((run_tick >= FORCE_START_TICK) &&
