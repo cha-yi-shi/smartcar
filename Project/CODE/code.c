@@ -262,6 +262,7 @@ int16 speed_decide(int16 e)
     int16 ae;
     int16 diff;
     int16 diff2;                       /* 速度环用的差速（脉冲单位） */
+    int16 tgt_per;                     /* 每周期期望路程（脉冲）= 速度 × 周期 */
 
     de_s = (int16)(e - error_last);
     error_last = e;
@@ -321,8 +322,11 @@ int16 speed_decide(int16 e)
     diff2 = (int16)(DIFF_K * (float)e);                 /* 速度环用：脉冲单位 */
     if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
     if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    target_l = (int16)(TARGET_SPEED_BASE - diff2);     /* E>0 → 左轮快 */
-    target_r = (int16)(TARGET_SPEED_BASE + diff2);     /* E>0 → 右轮慢（与开环一致） */
+    /* 每周期期望路程 = 目标速度(脉冲/秒) × 周期(ms) ÷ 1000 */
+    tgt_per  = (int16)(TARGET_SPEED_BASE * CTRL_PERIOD_MS / 1000);
+
+    target_l = (int16)(tgt_per - diff2);               /* E>0 → 左轮快 */
+    target_r = (int16)(tgt_per + diff2);               /* E>0 → 右轮慢 */
 
     /* ===== 圆环期间强制使用弯道 PID（环本身就是弯道，不受 |error| 阈值影响） ===== */
 #if (ELEM_ENABLE == 1)
