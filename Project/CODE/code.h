@@ -133,11 +133,11 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_ACTIVE_END    1690    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
 #define RING_KP             6.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
-#define RING_KD             1.0f
-#define RING_MOTOR_DUTY   -10000    /* ?? 圆环内电机固定占空比（负数=前进） */
+#define RING_KD             0.0f
+#define RING_MOTOR_DUTY    -9000    /* ?? 圆环内电机固定占空比（负数=前进） */
 
 /*------------ 时间段专用方向环 PID（KP=6.0，其他同 SERVO_*）------------*/
-#define PID2_KP             6.0f   /* ?? 专用方向环 KP */
+#define PID2_KP             8.0f   /* ?? 专用方向环 KP */
 #define PID2_T1_START      4000    /* ?? 20 秒 */
 #define PID2_T1_END        4200    /* ?? 21 秒 */
 #define PID2_T2_START      5400    /* ?? 27 秒 */
@@ -152,8 +152,10 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /* 第四套方向环 PID（KP=1.0）：8~9 秒 */
 #define PID4_KP             1.0f   /* ?? 第四套方向环 KP */
-#define PID4_T_START       1600    /* ?? 8 秒 */
-#define PID4_T_END         1800    /* ?? 9 秒 */
+#define PID4_T_START       1650    /* ?? 8 秒 */
+#define PID4_T_END         1850    /* ?? 9 秒 */
+#define PID4_T2_START      4200    /* ?? 21 秒（第二段开始） */
+#define PID4_T2_END        4600    /* ?? 23 秒（第二段结束） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
 #define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */

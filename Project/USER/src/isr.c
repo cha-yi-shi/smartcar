@@ -226,7 +226,8 @@ void TM4_Isr() interrupt 20
     }
 
     /* ===== 第四套方向环 PID：8~9 秒 用 KP=1.0 ===== */
-    if((run_tick >= PID4_T_START) && (run_tick < PID4_T_END))
+    if(((run_tick >= PID4_T_START)   && (run_tick < PID4_T_END)) ||
+       ((run_tick >= PID4_T2_START)  && (run_tick < PID4_T2_END)))
     {
         servo_pid.kp = PID4_KP;
         servo_pid.ki = SERVO_KI;
