@@ -207,6 +207,15 @@ void TM4_Isr() interrupt 20
     servo_pid.kd = SERVO_KD;
 #endif
 
+    /* ===== 时间段专用方向环 PID：20~21 秒 / 27~29 秒 用 KP=6.0 ===== */
+    if(((run_tick >= PID2_T1_START) && (run_tick < PID2_T1_END)) ||
+       ((run_tick >= PID2_T2_START) && (run_tick < PID2_T2_END)))
+    {
+        servo_pid.kp = PID2_KP;
+        servo_pid.ki = SERVO_KI;
+        servo_pid.kd = SERVO_KD;
+    }
+
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
 

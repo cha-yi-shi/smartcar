@@ -330,7 +330,7 @@ int16 speed_decide(int16 e)
     duty_diff = 0;
     diff2     = 0;
 
-    /* 仅在 DIFF_T_START ~ DIFF_T_END 之间启用差速（速度环目标差速） */
+    /* 速度环差速已按 v2 要求去掉：diff2 恒为 0（两个差速窗口也不用）
     if(((run_tick >= DIFF_T_START)  && (run_tick < DIFF_T_END)) ||
        ((run_tick >= DIFF_T2_START) && (run_tick < DIFF_T2_END)))
     {
@@ -338,6 +338,7 @@ int16 speed_decide(int16 e)
         if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
         if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
     }
+    ===== 差速窗口结束 ===== */
     /* 每周期目标路程（脉冲） → 加差速分配给左右轮 */
     tgt_per  = TARGET_SPEED_BASE;                      /* 每周期目标路程（脉冲） */
 

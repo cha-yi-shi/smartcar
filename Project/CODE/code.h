@@ -136,6 +136,13 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_KD             1.0f
 #define RING_MOTOR_DUTY   -10000    /* ?? 圆环内电机固定占空比（负数=前进） */
 
+/*------------ 时间段专用方向环 PID（KP=6.0，其他同 SERVO_*）------------*/
+#define PID2_KP             6.0f   /* ?? 专用方向环 KP */
+#define PID2_T1_START      4000    /* ?? 20 秒 */
+#define PID2_T1_END        4200    /* ?? 21 秒 */
+#define PID2_T2_START      5400    /* ?? 27 秒 */
+#define PID2_T2_END        5800    /* ?? 29 秒 */
+
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
 #define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */
 #define DIFF_T_END         4200    /* ?? 21 秒（4200×5ms）停止差速 */
