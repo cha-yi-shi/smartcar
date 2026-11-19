@@ -14,7 +14,7 @@
 /*======================= ¶æ»ú£¨L4 4.7£© =======================*/
 
 #define SERVO_PWM_CH    PWMB_CH1_P74
-#define SERVO_MID       650
+#define SERVO_MID       630
 #define SERVO_LEFT      200
 #define SERVO_RIGHT     950
 

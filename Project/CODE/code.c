@@ -326,12 +326,6 @@ int16 speed_decide(int16 e)
     if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
     if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
 
-    /* 起步第一秒：不做差速，两轮同速直着走 */
-    if(run_tick < FORCE_MID_TIME)
-    {
-        diff  = 0;
-        diff2 = 0;
-    }
     /* 每周期目标路程（脉冲） → 加差速分配给左右轮 */
     tgt_per  = TARGET_SPEED_BASE;                      /* 每周期目标路程（脉冲） */
 
