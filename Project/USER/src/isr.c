@@ -162,7 +162,9 @@ void TM3_Isr() interrupt 19
  *------------------------------------------------------------------------------------------------------------------*/
 void TM4_Isr() interrupt 20
 {
+#if (RING_PID_ENABLE == 1)
     uint8 ring_now;                              /* 1 = 当前处于圆环段 */
+#endif
 	TIM4_CLEAR_FLAG; //清除中断标志
 	key_handler();   //按键扫描（L3 3.3.2）
 
@@ -184,6 +186,7 @@ void TM4_Isr() interrupt 20
     speed_now = speed_decide(error);
 
     /* ④ 方向环 → 舵机（用上面选好的 PID） */
+#if (RING_PID_ENABLE == 1)
     /* ===== 圆环段：换用独立 PID（RING_KP=4），其他参数不变 ===== */
     ring_now = (uint8)((run_tick >= RING_ACTIVE_START) && (run_tick < RING_ACTIVE_END));
     if(ring_now)
@@ -198,6 +201,11 @@ void TM4_Isr() interrupt 20
         servo_pid.ki = SERVO_KI;
         servo_pid.kd = SERVO_KD;
     }
+#else
+    servo_pid.kp = SERVO_KP;
+    servo_pid.ki = SERVO_KI;
+    servo_pid.kd = SERVO_KD;
+#endif
 
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
@@ -244,12 +252,14 @@ void TM4_Isr() interrupt 20
     if(speed_l < peak_l)  peak_l = speed_l;        /* 前进为负，取最负 = 最快 */
     if(speed_r < peak_r)  peak_r = speed_r;
 
+#if (RING_PID_ENABLE == 1)
     /* ===== 圆环段：电机固定占空比（不走速度环）===== */
     if(ring_now)
     {
         Motor_Set((int)RING_MOTOR_DUTY, (int)RING_MOTOR_DUTY);
     }
     else
+#endif
     {
 #if (SPEED_LOOP_ENABLE == 1)
     /* ===== 速度环：20ms 判断一次（4 个 5ms 周期累加） =====

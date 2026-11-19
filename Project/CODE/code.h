@@ -128,16 +128,17 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define FORCE_OUT_DUTY     740     /* ?? 出环duty（650=中位，越大越右） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
-#define RING_ACTIVE_START  1000    /* ?? 5.0 秒：进入圆环段（估计值，待你实测） */
-#define RING_ACTIVE_END    1800    /* ?? 9.0 秒：离开圆环段（估计值，待你实测） */
+#define RING_PID_ENABLE      0     /* ?? 0 = 圆环独立PID+固定占空比【暂时关闭】（调参用）；1 = 启用 */
+#define RING_ACTIVE_START     0    /* ?? 5.0 秒：进入圆环段（估计值，待你实测） */
+#define RING_ACTIVE_END       0    /* ?? 9.0 秒：离开圆环段（估计值，待你实测） */
 #define RING_KP             4.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
 #define RING_KD             4.0f
-#define RING_MOTOR_DUTY   -6000    /* ?? 圆环内电机固定占空比（负数=前进） */
+#define RING_MOTOR_DUTY   -10000    /* ?? 圆环内电机固定占空比（负数=前进） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
-#define DIFF_T_START       3000    /* ?? 15 秒（3000×5ms）开始启用差速 */
-#define DIFF_T_END         3600    /* ?? 18 秒（3600×5ms）停止差速 */
+#define DIFF_T_START          0    /* ?? 15 秒（3000×5ms）开始启用差速 */
+#define DIFF_T_END            0    /* ?? 18 秒（3600×5ms）停止差速 */
 
 /*===================================================================================================================
  *  类型与变量
