@@ -45,9 +45,9 @@
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        2.6f
+#define SERVO_KP        2.5f
 #define SERVO_KI        0.0f
-#define SERVO_KD        7.0f
+#define SERVO_KD        7.5f
 #define SERVO_MAX_I     100.0f
 #define SERVO_MAX_OUT   400.0f
 
@@ -143,11 +143,18 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define PID2_T2_START      5400    /* ?? 27 秒 */
 #define PID2_T2_END        5800    /* ?? 29 秒 */
 
+/* 第三套方向环 PID（KP=2.8）：1.5~2.5 秒 / 32~33 秒 */
+#define PID3_KP             2.8f   /* ?? 第三套方向环 KP */
+#define PID3_T1_START       300    /* ?? 1.5 秒 */
+#define PID3_T1_END         500    /* ?? 2.5 秒 */
+#define PID3_T2_START      6400    /* ?? 32 秒 */
+#define PID3_T2_END        6600    /* ?? 33 秒 */
+
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
 #define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */
 #define DIFF_T_END         4200    /* ?? 21 秒（4200×5ms）停止差速 */
 #define DIFF_T2_START      5400    /* ?? 27 秒（5400×5ms）第二个差速窗口开始 */
-#define DIFF_T2_END        5700    /* ?? 28 秒（5600×5ms）第二个差速窗口结束 */
+#define DIFF_T2_END        5600    /* ?? 28 秒（5600×5ms）第二个差速窗口结束 */
 
 /*===================================================================================================================
  *  类型与变量
