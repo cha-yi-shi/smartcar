@@ -22,3 +22,7 @@ Thumbs.db
 desktop.ini
 .DS_Store
 .merkle-snapshot.json
+# 根目录误放的 Keil 工程文件（真正的在 Project/MDK/）
+/SEEKFREE.uvproj
+/SEEKFREE.uvopt
+/SEEKFREE.uvgui.*
