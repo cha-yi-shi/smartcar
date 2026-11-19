@@ -225,6 +225,14 @@ void TM4_Isr() interrupt 20
         servo_pid.kd = SERVO_KD;
     }
 
+    /* ===== 第四套方向环 PID：8~9 秒 用 KP=1.0 ===== */
+    if((run_tick >= PID4_T_START) && (run_tick < PID4_T_END))
+    {
+        servo_pid.kp = PID4_KP;
+        servo_pid.ki = SERVO_KI;
+        servo_pid.kd = SERVO_KD;
+    }
+
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
 

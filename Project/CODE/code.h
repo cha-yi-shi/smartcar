@@ -120,7 +120,7 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_FORCE_ENABLE    1     /* ?? 1 = 启用进环强制打角（出环打角已停用） */
 
 
-#define FORCE_START_TICK   910     /* ?? 5.3 秒 开始进环强制左打 */
+#define FORCE_START_TICK   905     /* ?? 5.3 秒 开始进环强制左打 */
 #define FORCE_TIME_TICK    300     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
 #define FORCE_DUTY         350     /* ?? 打角 duty（650=中位，越小越左） */
 #define FORCE_OUT_START    590     /* 开始出环 (环内时间)（0543）*/
@@ -129,8 +129,8 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
 #define RING_PID_ENABLE      1     /* ?? 1 = 圆环段用独立 PID(KP=4) + 固定占空比 */
-#define RING_ACTIVE_START   910    /* ?? 5.3 秒进入圆环段（独立PID+固定占空比） */
-#define RING_ACTIVE_END    1700    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
+#define RING_ACTIVE_START   905    /* ?? 5.3 秒进入圆环段（独立PID+固定占空比） */
+#define RING_ACTIVE_END    1690    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
 #define RING_KP             6.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
 #define RING_KD             1.0f
@@ -149,6 +149,11 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define PID3_T1_END         500    /* ?? 2.5 秒 */
 #define PID3_T2_START      6400    /* ?? 32 秒 */
 #define PID3_T2_END        6600    /* ?? 33 秒 */
+
+/* 第四套方向环 PID（KP=1.0）：8~9 秒 */
+#define PID4_KP             1.0f   /* ?? 第四套方向环 KP */
+#define PID4_T_START       1600    /* ?? 8 秒 */
+#define PID4_T_END         1800    /* ?? 9 秒 */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
 #define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */
