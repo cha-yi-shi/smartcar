@@ -117,7 +117,7 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
-#define RING_FORCE_ENABLE    1     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
+#define RING_FORCE_ENABLE    0     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
 
 
 #define FORCE_START_TICK  1025     /* 开始进环 */
@@ -126,6 +126,18 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define FORCE_OUT_START   1028     /* 开始出环 (环内时间)（0543）*/
 #define FORCE_OUT_TIME     0     /* ?? 160×5ms = 0.8 秒 出环时长 */
 #define FORCE_OUT_DUTY     740     /* ?? 出环duty（650=中位，越大越右） */
+
+/*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
+#define RING_ACTIVE_START  1000    /* ?? 5.0 秒：进入圆环段（估计值，待你实测） */
+#define RING_ACTIVE_END    1800    /* ?? 9.0 秒：离开圆环段（估计值，待你实测） */
+#define RING_KP             4.0f   /* ?? 圆环专用 KP */
+#define RING_KI             0.0f
+#define RING_KD             4.0f
+#define RING_MOTOR_DUTY   -6000    /* ?? 圆环内电机固定占空比（负数=前进） */
+
+/*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
+#define DIFF_T_START       3000    /* ?? 15 秒（3000×5ms）开始启用差速 */
+#define DIFF_T_END         3600    /* ?? 18 秒（3600×5ms）停止差速 */
 
 /*===================================================================================================================
  *  类型与变量
