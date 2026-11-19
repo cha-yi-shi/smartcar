@@ -73,7 +73,7 @@
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
 #define DIFF_K              0.03f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
-#define DIFF_LIMIT          3       /* ?? 速度环差速上限：最多差 2 个脉冲（约 27%） */
+#define DIFF_LIMIT          2       /* ?? 速度环差速上限：最多差 2 个脉冲（约 27%） */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
 #define SPEED_E_ON         35   /* ?? |error| > 18 → 判定进弯，减速 */
@@ -90,7 +90,7 @@
 
 /*----------------------------- 速度环 PI（L5 5.3） -----------------------------*/
 #define SPEED_KP           40.0f    /* ?? 速度环阻尼 */
-#define SPEED_KI           50.0f    /* ?? 速度环主响应 */
+#define SPEED_KI           60.0f    /* ?? 速度环主响应 */
 #define SPEED_KD            0.0f
 #define SPEED_MAX_OUT      10000.0f  /* ?? 输出限幅（占空比）：12 脉冲约需 8000 */
 
@@ -120,11 +120,11 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_FORCE_ENABLE    1     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
 
 
-#define FORCE_START_TICK  1086     /* 开始进环 */
+#define FORCE_START_TICK  1025     /* 开始进环 */
 #define FORCE_TIME_TICK    240     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
-#define FORCE_DUTY         370     /* ?? 打角 duty（650=中位，越小越左） */
-#define FORCE_OUT_START   1028     /* 开始出环 (环内时间)*/
-#define FORCE_OUT_TIME     120     /* ?? 160×5ms = 0.8 秒 出环时长 */
+#define FORCE_DUTY         400     /* ?? 打角 duty（650=中位，越小越左） */
+#define FORCE_OUT_START   1028     /* 开始出环 (环内时间)（0543）*/
+#define FORCE_OUT_TIME     0     /* ?? 160×5ms = 0.8 秒 出环时长 */
 #define FORCE_OUT_DUTY     740     /* ?? 出环duty（650=中位，越大越右） */
 
 /*===================================================================================================================
