@@ -140,8 +140,8 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define PID2_KP             8.0f   /* ?? 专用方向环 KP */
 #define PID2_T1_START      4000    /* ?? 20 秒 */
 #define PID2_T1_END        4200    /* ?? 21 秒 */
-#define PID2_T2_START      5400    /* ?? 27 秒 */
-#define PID2_T2_END        5800    /* ?? 29 秒 */
+#define PID2_T2_START      5250    /* ?? 27 秒 */
+#define PID2_T2_END        5600    /* ?? 29 秒 */
 
 /* 第三套方向环 PID（KP=2.8）：1.5~2.5 秒 / 32~33 秒 */
 #define PID3_KP             2.8f   /* ?? 第三套方向环 KP */
@@ -156,6 +156,10 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define PID4_T_END         1850    /* ?? 9 秒 */
 #define PID4_T2_START      4200    /* ?? 21 秒（第二段开始） */
 #define PID4_T2_END        4600    /* ?? 23 秒（第二段结束） */
+
+/*------------ 丢线保护：四路电感和太小 = 丢线 → 减速但不停 ------------*/
+#define LOST_SUM           15     /* ?? 四路归一化值之和 < 15 判为丢线（在线上约 70） */
+#define LOST_DUTY       -4000     /* ?? 丢线时的电机占空比（负=前进，40% 速度，不会停） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
 #define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */

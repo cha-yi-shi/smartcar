@@ -340,6 +340,12 @@ void TM4_Isr() interrupt 20
 
     }
 
+    /* ===== 丢线保护：四路电感和太小 → 减速但不停 ===== */
+    if((lh + rh + lv + rv) < LOST_SUM)
+    {
+        Motor_Set((int)LOST_DUTY, (int)LOST_DUTY);
+    }
+
 //void  INT0_Isr()  interrupt 0;
 //void  TM0_Isr()   interrupt 1;
 //void  INT1_Isr()  interrupt 2;
