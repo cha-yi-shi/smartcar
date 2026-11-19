@@ -45,9 +45,9 @@
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        3.5f
+#define SERVO_KP        2.5f
 #define SERVO_KI        0.0f
-#define SERVO_KD        8.0f
+#define SERVO_KD        6.5f
 #define SERVO_MAX_I     100.0f
 #define SERVO_MAX_OUT   400.0f
 
@@ -117,10 +117,10 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
-#define RING_FORCE_ENABLE    0     /* ?? 0 = 圆环开环【关】（不走环，专心标定） 1 = 开 */
+#define RING_FORCE_ENABLE    1     /* ?? 1 = 启用进环强制打角（出环打角已停用） */
 
 
-#define FORCE_START_TICK  1025     /* 开始进环 */
+#define FORCE_START_TICK  1060     /* ?? 5.3 秒 开始进环强制左打 */
 #define FORCE_TIME_TICK    240     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
 #define FORCE_DUTY         400     /* ?? 打角 duty（650=中位，越小越左） */
 #define FORCE_OUT_START   1028     /* 开始出环 (环内时间)（0543）*/
@@ -128,9 +128,9 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define FORCE_OUT_DUTY     740     /* ?? 出环duty（650=中位，越大越右） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
-#define RING_PID_ENABLE      0     /* ?? 0 = 圆环独立PID+固定占空比【暂时关闭】（调参用）；1 = 启用 */
-#define RING_ACTIVE_START     0    /* ?? 5.0 秒：进入圆环段（估计值，待你实测） */
-#define RING_ACTIVE_END       0    /* ?? 9.0 秒：离开圆环段（估计值，待你实测） */
+#define RING_PID_ENABLE      1     /* ?? 1 = 圆环段用独立 PID(KP=4) + 固定占空比 */
+#define RING_ACTIVE_START  1060    /* ?? 5.3 秒进入圆环段（独立PID+固定占空比） */
+#define RING_ACTIVE_END    1860    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
 #define RING_KP             4.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
 #define RING_KD             4.0f
