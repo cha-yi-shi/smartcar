@@ -41,7 +41,7 @@
 
 #define SPEED_LOOP_ENABLE       1       /* 0 = 开环，占空比固定 -10000（用于标定测量） */
 #define LCD_DEBUG               0       /* ?? 0 = 关闭屏幕打印（提速，不占用主循环） 1 = 打开 */
-#define ELEM_ENABLE             0       /* 0 = 圆环闭环关闭，改按时间开环进环 */
+#define ELEM_ENABLE             0       /* 测试版：元素状态机全关 */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
@@ -72,7 +72,7 @@
 #define DIFF_DEAD          20     /* ?? 差速死区：|error| < 10 不做差速，保证直道满速 */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              0.03f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
+#define DIFF_K              0.02f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
 #define DIFF_LIMIT          2       /* ?? 速度环差速上限：最多差 2 个脉冲（约 27%） */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
@@ -117,7 +117,7 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
-#define RING_FORCE_ENABLE    1     /* ?? 1 = 启用进环强制打角（出环打角已停用） */
+#define RING_FORCE_ENABLE    0     /* 测试版：无环岛 */
 
 
 #define FORCE_START_TICK   910     /* ?? 5.3 秒 开始进环强制左打 */
@@ -128,19 +128,19 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define FORCE_OUT_DUTY     550     /* ?? 出环duty（650=中位，越大越右） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
-#define RING_PID_ENABLE      1     /* ?? 1 = 圆环段用独立 PID(KP=4) + 固定占空比 */
+#define RING_PID_ENABLE      0     /* 测试版：无环岛独立PID */
 #define RING_ACTIVE_START   910    /* ?? 5.3 秒进入圆环段（独立PID+固定占空比） */
-#define RING_ACTIVE_END    1700    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
-#define RING_KP             6.0f   /* ?? 圆环专用 KP */
+#define RING_ACTIVE_END    1600    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
+#define RING_KP             7.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
 #define RING_KD             1.0f
 #define RING_MOTOR_DUTY   -10000    /* ?? 圆环内电机固定占空比（负数=前进） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
-#define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */
-#define DIFF_T_END         4200    /* ?? 21 秒（4200×5ms）停止差速 */
-#define DIFF_T2_START      5400    /* ?? 27 秒（5400×5ms）第二个差速窗口开始 */
-#define DIFF_T2_END        5700    /* ?? 28 秒（5600×5ms）第二个差速窗口结束 */
+#define DIFF_T_START     0     /* 测试版：时间窗口全部关闭 */
+#define DIFF_T_END       0     /* 测试版：时间窗口全部关闭 */
+#define DIFF_T2_START    0     /* 测试版：时间窗口全部关闭 */
+#define DIFF_T2_END      0     /* 测试版：时间窗口全部关闭 */
 
 /*===================================================================================================================
  *  类型与变量
