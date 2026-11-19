@@ -331,7 +331,8 @@ int16 speed_decide(int16 e)
     diff2     = 0;
 
     /* 仅在 DIFF_T_START ~ DIFF_T_END 之间启用差速（速度环目标差速） */
-    if((run_tick >= DIFF_T_START) && (run_tick < DIFF_T_END))
+    if(((run_tick >= DIFF_T_START)  && (run_tick < DIFF_T_END)) ||
+       ((run_tick >= DIFF_T2_START) && (run_tick < DIFF_T2_END)))
     {
         diff2 = (int16)(DIFF_K * (float)e);
         if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;

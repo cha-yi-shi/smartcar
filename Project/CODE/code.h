@@ -120,17 +120,17 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_FORCE_ENABLE    1     /* ?? 1 = 启用进环强制打角（出环打角已停用） */
 
 
-#define FORCE_START_TICK  1060     /* ?? 5.3 秒 开始进环强制左打 */
-#define FORCE_TIME_TICK    240     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
-#define FORCE_DUTY         400     /* ?? 打角 duty（650=中位，越小越左） */
-#define FORCE_OUT_START   1028     /* 开始出环 (环内时间)（0543）*/
-#define FORCE_OUT_TIME     0     /* ?? 160×5ms = 0.8 秒 出环时长 */
+#define FORCE_START_TICK   920     /* ?? 5.3 秒 开始进环强制左打 */
+#define FORCE_TIME_TICK    300     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
+#define FORCE_DUTY         350     /* ?? 打角 duty（650=中位，越小越左） */
+#define FORCE_OUT_START    710     /* 开始出环 (环内时间)（0543）*/
+#define FORCE_OUT_TIME     160     /* ?? 160×5ms = 0.8 秒 出环时长 */
 #define FORCE_OUT_DUTY     740     /* ?? 出环duty（650=中位，越大越右） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
 #define RING_PID_ENABLE      1     /* ?? 1 = 圆环段用独立 PID(KP=4) + 固定占空比 */
-#define RING_ACTIVE_START  1060    /* ?? 5.3 秒进入圆环段（独立PID+固定占空比） */
-#define RING_ACTIVE_END    1860    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
+#define RING_ACTIVE_START   920    /* ?? 5.3 秒进入圆环段（独立PID+固定占空比） */
+#define RING_ACTIVE_END    1430    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
 #define RING_KP             4.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
 #define RING_KD             4.0f
@@ -139,6 +139,8 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
 #define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */
 #define DIFF_T_END         4200    /* ?? 21 秒（4200×5ms）停止差速 */
+#define DIFF_T2_START      5400    /* ?? 27 秒（5400×5ms）第二个差速窗口开始 */
+#define DIFF_T2_END        5600    /* ?? 28 秒（5600×5ms）第二个差速窗口结束 */
 
 /*===================================================================================================================
  *  类型与变量
