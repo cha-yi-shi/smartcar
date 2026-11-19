@@ -310,22 +310,25 @@ int16 speed_decide(int16 e)
         }
     }
 
-    /* ===== 两轮差速（不依赖弯道状态，直接按偏差给） =====
-       E > 0 → 左打 → 内侧左轮慢、外侧右轮快
-       E < 0 → 右打 → 内侧右轮慢、外侧左轮快
-       E ≈ 0（直道）→ 差速自动为 0 ============================ */
-    diff  = (int16)(DIFF_DUTY_K * (float)e);            /* 开环用：占空比单位 */
+    /* ===== 差速已停用（按要求改成纯速度环 + 方向环）=====
+       两轮目标完全一样，只靠舵机转向
+       需要恢复差速时，把下面 #if 0 改成 #if 1 即可
+    #if 0
+    diff  = (int16)(DIFF_DUTY_K * (float)e);
     if(diff >  DIFF_DUTY_LIMIT)  diff =  DIFF_DUTY_LIMIT;
     if(diff < -DIFF_DUTY_LIMIT)  diff = -DIFF_DUTY_LIMIT;
-    /* 差速死区：偏差太小就不差速，保证直道满速 */
     if((e > -DIFF_DEAD) && (e < DIFF_DEAD))  diff = 0;
-
     duty_diff = diff;
 
-    diff2 = (int16)(DIFF_K * (float)e);                 /* 速度环用：脉冲单位 */
+    diff2 = (int16)(DIFF_K * (float)e);
     if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
     if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
+    #endif
+    ===== 差速停用结束 ===== */
 
+    diff      = 0;                      /* 两轮同速 */
+    duty_diff = 0;
+    diff2     = 0;
     /* 每周期目标路程（脉冲） → 加差速分配给左右轮 */
     tgt_per  = TARGET_SPEED_BASE;                      /* 每周期目标路程（脉冲） */
 
