@@ -36,7 +36,7 @@
 #define ADC_FILTER_NUM      10   /* 去极值平均：采 5 次去掉最大最小，剩 3 次平均 */
 
 /*----------------------------- 手动调参区 -----------------------------*/
-#define TARGET_DUTY_DEFAULT     -10000       /* ?? 开环占空比 0~10000（想跑就改成 3000 左右） */
+#define TARGET_DUTY_DEFAULT     0       /* ?? 开环占空比 0~10000（想跑就改成 3000 左右） */
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
 #define SPEED_LOOP_ENABLE       1       /* 0 = 开环，占空比固定 -10000（用于标定测量） */
