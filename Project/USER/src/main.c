@@ -50,7 +50,7 @@ void main()
     encoder_init(ENCODER1);
 	encoder_init(ENCODER2);
 
-    key_list_init(10);                      /* 按键 10ms 扫描（跟控制周期一致） */
+    key_list_init(5);                       /* 按键 5ms 扫描（跟控制周期一致） */
 
     /* L4 4.3：四路电感通道各初始化一次（照 CarDemo1：P0.0 ~ P0.3） */
     adc_init(ADC_LEFTX_CHANNEL,  ADC_SYSclk_DIV_2);
@@ -67,7 +67,7 @@ void main()
     Incremental_PID_Init(&left_pid,  SPEED_KP, SPEED_KI, SPEED_KD, SPEED_MAX_OUT);
     Incremental_PID_Init(&right_pid, SPEED_KP, SPEED_KI, SPEED_KD, SPEED_MAX_OUT);
 
-    pit_timer_ms(TIM_4,10);                 /* 10ms 控制周期（电感每 10ms 读一次） */
+    pit_timer_ms(TIM_4,5);                  /* 5ms 控制周期（电感每 5ms 读一次） */
 
     while(1)
     {

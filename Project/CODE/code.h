@@ -40,12 +40,12 @@
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
 #define SPEED_LOOP_ENABLE       1       /* 0 = 开环，占空比固定 -10000（用于标定测量） */
-#define LCD_DEBUG               0       /* ?? 0 = 关闭屏幕打印（提速，不占用主循环） 1 = 打开 */
+#define LCD_DEBUG               1       /* ?? 0 = 关闭屏幕打印（提速，不占用主循环） 1 = 打开 */
 #define ELEM_ENABLE             0       /* 测试版：元素状态机全关 */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        2.6f
+#define SERVO_KP        8.0f
 #define SERVO_KI        0.0f
 #define SERVO_KD        7.0f
 #define SERVO_MAX_I     100.0f
@@ -60,12 +60,12 @@
 #define SPEED_STRAIGHT -10000   /* ?? 直道：满占空比（保持竞速速度） */
 
 /*----------------------------- 两轮差速（给在速度环 PID 的目标值上） -----------------------------*/
-#define TARGET_SPEED_BASE  -14     /* ?? 每 10ms 目标路程（脉冲）：原来 5ms 是 -7，翻倍 */
+#define TARGET_SPEED_BASE   -7     /* ?? 每 5ms 目标路程（脉冲） */
 /* #define CTRL_PERIOD_MS 5 --- 已改为直接用每周期路程，不再换算速度 */
 /* 开环差速：直接改电机占空比（不用速度环、不用编码器） */
 #define SPEED_NO_REVERSE    1       /* ?? 1 = 禁止电机反转：超过目标速度就断油到 0，不准反向 */
 #define DEAD_SPEED          1       /* ?? 速度死区（10ms 累加单位）：1 = 1 脉冲 */
-#define SPEED_SAMPLE_DIV    1       /* ?? 1×10ms = 10ms 采样一次（与原来 2×5ms 等价） */
+#define SPEED_SAMPLE_DIV    2       /* ?? 2×5ms = 10ms 采样一次 */
 
 #define DIFF_DUTY_K     100      /* ?? 开环差速系数：error=40 → 左右占空比差 ±4000（40%） */
 #define DIFF_DUTY_LIMIT  8000    /* ?? 最大差速（占空比）= 60%，内侧最慢可到 40% */
@@ -120,8 +120,8 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_FORCE_ENABLE    0     /* 测试版：无环岛 */
 
 
-#define FORCE_START_TICK   455     /* ?? 455×10ms = 4.55 秒 开始进环 */
-#define FORCE_TIME_TICK    150     /* ?? 150×10ms = 1.5 秒 强制打角时长 */
+#define FORCE_START_TICK   910     /* ?? 910×5ms = 4.55 秒 开始进环 */
+#define FORCE_TIME_TICK    300     /* ?? 300×5ms = 1.5 秒 强制打角时长 */
 #define FORCE_DUTY         350     /* ?? 打角 duty（650=中位，越小越左） */
 #define FORCE_OUT_START    590     /* 开始出环 (环内时间)（0543）*/
 #define FORCE_OUT_TIME       0     /* ?? 160×5ms = 0.8 秒 出环时长 */
@@ -129,8 +129,8 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
 #define RING_PID_ENABLE      0     /* 测试版：无环岛独立PID */
-#define RING_ACTIVE_START   455    /* ?? 4.55 秒进入圆环段 */
-#define RING_ACTIVE_END     800    /* ?? 8.0 秒离开圆环段 */
+#define RING_ACTIVE_START   910    /* ?? 4.55 秒进入圆环段 */
+#define RING_ACTIVE_END    1600    /* ?? 8.0 秒离开圆环段 */
 #define RING_KP             7.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
 #define RING_KD             1.0f
@@ -138,7 +138,7 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
 #define DIFF_T_START        0     /* ?? 0 秒开始：全程启用速度环差速 */
-#define DIFF_T_END      60000     /* ?? 60000×10ms = 600 秒：等于全程 */
+#define DIFF_T_END          0     /* ?? 60000×10ms = 600 秒：等于全程 */
 #define DIFF_T2_START       0     /* 备用窗口（未用） */
 #define DIFF_T2_END         0     /* 备用窗口（未用） */
 
