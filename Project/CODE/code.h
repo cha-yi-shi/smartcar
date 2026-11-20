@@ -40,8 +40,8 @@
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
 #define SPEED_LOOP_ENABLE       1       /* 0 = 开环，占空比固定 -10000（用于标定测量） */
-#define LCD_DEBUG               0       /* ?? 0 = 关闭屏幕打印（提速，不占用主循环） 1 = 打开 */
-#define ELEM_ENABLE             0       /* 0 = 圆环闭环关闭，改按时间开环进环 */
+#define LCD_DEBUG               1       /* ? 屏幕打印正常输出 */
+#define ELEM_ENABLE             1       /* ? 圆环闭环开启（电感阈值状态机）*/
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
@@ -117,7 +117,7 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
-#define RING_FORCE_ENABLE    1     /* ?? 1 = 启用进环强制打角（出环打角已停用） */
+#define RING_FORCE_ENABLE    0     /* ? 定时强制打角关闭（改用闭环）*/
 
 
 #define FORCE_START_TICK   910     /* ?? 5.3 秒 开始进环强制左打 */
@@ -128,7 +128,7 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define FORCE_OUT_DUTY     550     /* ?? 出环duty（650=中位，越大越右） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
-#define RING_PID_ENABLE      1     /* ?? 1 = 圆环段用独立 PID(KP=4) + 固定占空比 */
+#define RING_PID_ENABLE      0     /* ? 圆环独立PID关闭（只用一套方向环）*/
 #define RING_ACTIVE_START   910    /* ?? 5.3 秒进入圆环段（独立PID+固定占空比） */
 #define RING_ACTIVE_END    1700    /* ?? 9.3 秒离开圆环段（恢复普通 PID） */
 #define RING_KP             6.0f   /* ?? 圆环专用 KP */
@@ -137,10 +137,10 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_MOTOR_DUTY   -10000    /* ?? 圆环内电机固定占空比（负数=前进） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
-#define DIFF_T_START       4000    /* ?? 20 秒（4000×5ms）开始启用差速 */
-#define DIFF_T_END         4200    /* ?? 21 秒（4200×5ms）停止差速 */
-#define DIFF_T2_START      5400    /* ?? 27 秒（5400×5ms）第二个差速窗口开始 */
-#define DIFF_T2_END        5700    /* ?? 28 秒（5600×5ms）第二个差速窗口结束 */
+#define DIFF_T_START        0     /* ? 无差速 */
+#define DIFF_T_END          0     /* ? 无差速 */
+#define DIFF_T2_START       0     /* ? 无差速 */
+#define DIFF_T2_END         0     /* ? 无差速 */
 
 /*===================================================================================================================
  *  类型与变量
