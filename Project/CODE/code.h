@@ -45,7 +45,7 @@
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        3.9f
+#define SERVO_KP        2.6f
 #define SERVO_KI        0.0f
 #define SERVO_KD        7.0f
 #define SERVO_MAX_I     100.0f
@@ -137,10 +137,12 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_MOTOR_DUTY   -10000    /* ?? 圆环内电机固定占空比（负数=前进） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
-#define DIFF_T_START        0     /* 纯净版：差速关闭 */
-#define DIFF_T_END          0     /* 纯净版：差速关闭（窗口为空）*/
-#define DIFF_T2_START       0     /* 备用窗口（未用） */
-#define DIFF_T2_END         0     /* 备用窗口（未用） */
+#define DIFF_T_START        0     /* ?? 【第一段】开始 tick = 秒 × 200 */
+#define DIFF_T_END          0     /* ?? 【第一段】结束 tick = 秒 × 200 */
+#define DIFF_T2_START       0     /* ?? 【第二段】开始 tick = 秒 × 200 */
+#define DIFF_T2_END         0     /* ?? 【第二段】结束 tick = 秒 × 200 */
+#define DIFF_T3_START       0     /* ?? 【第三段】开始 tick = 秒 × 200 */
+#define DIFF_T3_END         0     /* ?? 【第三段】结束 tick = 秒 × 200 */
 
 /*===================================================================================================================
  *  类型与变量

@@ -330,9 +330,10 @@ int16 speed_decide(int16 e)
     duty_diff = 0;
     diff2     = 0;
 
-    /* 仅在 DIFF_T_START ~ DIFF_T_END 之间启用差速（速度环目标差速） */
-    if(((run_tick >= DIFF_T_START)  && (run_tick < DIFF_T_END)) ||
-       ((run_tick >= DIFF_T2_START) && (run_tick < DIFF_T2_END)))
+    /* 三段差速窗口：任一段命中就给差速（时间由 DIFF_T*_START/END 决定） */
+    if(((run_tick >= DIFF_T_START)  && (run_tick < DIFF_T_END))  ||
+       ((run_tick >= DIFF_T2_START) && (run_tick < DIFF_T2_END)) ||
+       ((run_tick >= DIFF_T3_START) && (run_tick < DIFF_T3_END)))
     {
         diff2 = (int16)(DIFF_K * (float)e);
         if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
