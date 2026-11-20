@@ -1,12 +1,12 @@
 /*********************************************************************************************************************
  * COPYRIGHT NOTICE
- * Copyright (c) 2020,逐飞科技
+ * Copyright (c) 2020,��ɿƼ�
  * All rights reserved.
- * 以下所有内容版权均属逐飞科技所有，未经允许不得用于商业用途，
- * 欢迎各位使用并传播本程序，修改内容时必须保留逐飞科技的版权声明。
+ * �����������ݰ�Ȩ������ɿƼ����У�δ����������������ҵ��;��
+ * ��ӭ��λʹ�ò������������޸�����ʱ���뱣����ɿƼ��İ�Ȩ������
  *
  * @file       		main
- * @company	   		成都逐飞科技有限公司
+ * @company	   		�ɶ���ɿƼ����޹�˾
  * @Software 		MDK FOR C251 V5.60
  * @Target core		STC32G12K128
  ********************************************************************************************************************/
@@ -18,9 +18,9 @@
 #include <string.h>
 
 /*
- * v3：电感（自适应窗口去极值 + 一阶低通）→ 差比和 → 曲率系数 → 预判增益
- *      → 位置式 PID（方向）+ 死区补偿 → 舵机
- *      → 编码器（一阶低通）→ 增量式 PID（速度）→ 两轮同速
+ * v3����У�����Ӧ����ȥ��ֵ + һ�׵�ͨ���� ��Ⱥ� �� ����ϵ�� �� Ԥ������
+ *      �� λ��ʽ PID������+ �������� �� ���
+ *      �� ��������һ�׵�ͨ���� ����ʽ PID���ٶȣ��� ����ͬ��
  */
 
 char txt[60];
@@ -28,7 +28,7 @@ extern int L_encoder,R_encoder;
 
 void main()
 {
-	board_init();			// 初始化寄存器,勿删除此句代码。
+	board_init();			// ��ʼ���Ĵ���,��ɾ���˾���롣
 
 	lcd_init();
     Motor_Init();
@@ -36,28 +36,28 @@ void main()
     encoder_init(ENCODER1);
 	encoder_init(ENCODER2);
 
-    /* 四路电感通道各初始化一次（P0.0 ~ P0.3） */
+    /* ��·���ͨ������ʼ��һ�Σ�P0.0 ~ P0.3�� */
     adc_init(ADC_LEFTX_CHANNEL,  ADC_SYSclk_DIV_2);
     adc_init(ADC_RIGHTX_CHANNEL, ADC_SYSclk_DIV_2);
     adc_init(ADC_LEFTY_CHANNEL,  ADC_SYSclk_DIV_2);
     adc_init(ADC_RIGHTY_CHANNEL, ADC_SYSclk_DIV_2);
 
-    /* 通道结构体初始化 */
+    /* ͨ���ṹ���ʼ�� */
     ch_lx.ch = ADC_LEFTX_CHANNEL;   ch_lx.max = LX_MAX;   ch_lx.min = LX_MIN;
     ch_rx.ch = ADC_RIGHTX_CHANNEL;  ch_rx.max = RX_MAX;   ch_rx.min = RX_MIN;
     ch_ly.ch = ADC_LEFTY_CHANNEL;   ch_ly.max = LY_MAX;   ch_ly.min = LY_MIN;
     ch_ry.ch = ADC_RIGHTY_CHANNEL;  ch_ry.max = RY_MAX;   ch_ry.min = RY_MIN;
 
-    pwm_init(PWMB_CH1_P74,50,650);          /* 舵机 50Hz */
+    pwm_init(PWMB_CH1_P74,50,650);          /* ��� 50Hz */
 
-    /* 方向环：位置式 PID */
+    /* ���򻷣�λ��ʽ PID */
     Positional_PID_Init(&servo_pid, SERVO_KP, SERVO_KI, SERVO_KD, SERVO_MAX_I, SERVO_MAX_OUT);
 
-    /* 速度环：增量式 PID */
+    /* �ٶȻ�������ʽ PID */
     Incremental_PID_Init(&left_pid,  SPEED_KP, SPEED_KI, SPEED_KD, SPEED_MAX_OUT);
     Incremental_PID_Init(&right_pid, SPEED_KP, SPEED_KI, SPEED_KD, SPEED_MAX_OUT);
 
-    pit_timer_ms(TIM_4,5);                  /* 5ms 控制周期 */
+    pit_timer_ms(TIM_4,5);                  /* 5ms �������� */
 
     while(1)
     {

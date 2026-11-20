@@ -1,12 +1,6 @@
 /*********************************************************************************************************************
- * COPYRIGHT NOTICE
- * Copyright (c) 2020,é€é£ç§‘æŠ€
- * All rights reserved.
- * ä»¥ä¸‹æ‰€æœ‰å†…å®¹ç‰ˆæƒå‡å±é€é£ç§‘æŠ€æ‰€æœ‰ï¼Œæœªç»å…è®¸ä¸å¾—ç”¨äºå•†ä¸šç”¨é€”ï¼Œ
- * æ¬¢è¿å„ä½ä½¿ç”¨å¹¶ä¼ æ’­æœ¬ç¨‹åºï¼Œä¿®æ”¹å†…å®¹æ—¶å¿…é¡»ä¿ç•™é€é£ç§‘æŠ€çš„ç‰ˆæƒå£°æ˜ã€‚
- *
  * @file       		isr
- * @company	   		æˆéƒ½é€é£ç§‘æŠ€æœ‰é™å…¬å¸
+ * @company	   		³É¶¼Öğ·É¿Æ¼¼ÓĞÏŞ¹«Ë¾
  * @Software 		MDK FOR C251 V5.60
  * @Target core		STC32G12K128
  ********************************************************************************************************************/
@@ -17,7 +11,7 @@
 
 int L_encoder=0,R_encoder=0;
 
-//UART1ä¸­æ–­
+//UART1ÖĞ¶Ï
 void UART1_Isr() interrupt 4
 {
     uint8 res;
@@ -31,7 +25,7 @@ void UART1_Isr() interrupt 4
     {
         UART1_CLEAR_RX_FLAG;
         res = SBUF;
-        //ç¨‹åºè‡ªåŠ¨ä¸‹è½½
+        //³ÌĞò×Ô¶¯ÏÂÔØ
         if(res == 0x7F)
         {
             if(dwon_count++ > 20)
@@ -44,7 +38,7 @@ void UART1_Isr() interrupt 4
     }
 }
 
-//UART2ä¸­æ–­
+//UART2ÖĞ¶Ï
 void UART2_Isr() interrupt 8
 {
     if(UART2_GET_TX_FLAG)
@@ -59,7 +53,7 @@ void UART2_Isr() interrupt 8
 	}
 }
 
-//UART3ä¸­æ–­
+//UART3ÖĞ¶Ï
 void UART3_Isr() interrupt 17
 {
     if(UART3_GET_TX_FLAG)
@@ -73,7 +67,7 @@ void UART3_Isr() interrupt 17
 	}
 }
 
-//UART4ä¸­æ–­
+//UART4ÖĞ¶Ï
 void UART4_Isr() interrupt 18
 {
     if(UART4_GET_TX_FLAG)
@@ -121,25 +115,25 @@ void TM3_Isr() interrupt 19
 }
 
 /*-------------------------------------------------------------------------------------------------------------------
- *  TM4ï¼š5ms æ§åˆ¶å‘¨æœŸ
- *      â‘  é‡‡ 4 è·¯ç”µæ„Ÿ â†’ çª—å£å»æå€¼å¹³å‡ â†’ ä¸€é˜¶ä½é€š â†’ å½’ä¸€åŒ–
- *      â‘¡ å·®æ¯”å’Œ â†’ error
- *      â‘¢ æ›²ç‡ç³»æ•° curv â†’ é¢„åˆ¤å¢ç›Š K
- *      â‘£ error Ã— K â†’ ä½ç½®å¼ PID â†’ æ­»åŒºè¡¥å¿ â†’ èˆµæœº
- *      â‘¤ åœ†ç¯å¼€ç¯å¼ºåˆ¶æ‰“è§’ï¼ˆåˆ°ç‚¹è¦†ç›–ï¼‰
- *      â‘¥ ç¼–ç å™¨ â†’ ä¸€é˜¶ä½é€š â†’ å¢é‡å¼ PID â†’ ç”µæœºï¼ˆä¸¤è½®åŒé€Ÿï¼‰
- *  ä¸­æ–­é‡Œä¸å»¶æ—¶ã€ä¸ç­‰å¾…ã€ä¸æ‰“å°
+ *  TM4£º5ms ¿ØÖÆÖÜÆÚ
+ *      1. ²É 4 Â·µç¸Ğ -> ´°¿ÚÈ¥¼«ÖµÆ½¾ù -> Ò»½×µÍÍ¨ -> ¹éÒ»»¯
+ *      2. ²î±ÈºÍ -> error
+ *      3. ÇúÂÊÏµÊı curv -> Ô¤ÅĞÔöÒæ K
+ *      4. error * K -> ÊäÈëËÀÇø -> Î»ÖÃÊ½ PID -> ¶æ»ú
+ *      5. Ô²»·¿ª»·Ç¿ÖÆ´ò½Ç£¨µ½µã¸²¸Ç£©
+ *      6. ±àÂëÆ÷ -> Ò»½×µÍÍ¨ -> ÔöÁ¿Ê½ PID -> µç»ú£¨Á½ÂÖÍ¬ËÙ£©
+ *  ÖĞ¶ÏÀï²»ÑÓÊ±¡¢²»µÈ´ı¡¢²»´òÓ¡
  *------------------------------------------------------------------------------------------------------------------*/
 void TM4_Isr() interrupt 20
 {
     int16  tl, tr, sl, sr, dl, dr;
     int16  out;
 
-    TIM4_CLEAR_FLAG;                        /* æ¸…é™¤ä¸­æ–­æ ‡å¿— */
+    TIM4_CLEAR_FLAG;                        /* Çå³ıÖĞ¶Ï±êÖ¾ */
 
-    if(run_tick < 60000) run_tick++;        /* ä¸Šç”µè®¡æ—¶ï¼ˆ5ms ä¸€æ‹ï¼‰ */
+    if(run_tick < 60000) run_tick++;        /* ÉÏµç¼ÆÊ±£¨5ms Ò»ÅÄ£© */
 
-    /* â‘  å››è·¯ç”µæ„Ÿï¼šé‡‡é›† â†’ å»æå€¼å¹³å‡ â†’ ä½é€š â†’ å½’ä¸€åŒ– */
+    /* 1. ËÄÂ·µç¸Ğ£º²É¼¯ -> È¥¼«ÖµÆ½¾ù -> µÍÍ¨ -> ¹éÒ»»¯ */
     lh = adc_proc(&ch_lx);
     rh = adc_proc(&ch_rx);
     lv = adc_proc(&ch_ly);
@@ -150,44 +144,41 @@ void TM4_Isr() interrupt 20
     raw_ly = ch_ly.val;
     raw_ry = ch_ry.val;
 
-    sv_now = (uint16)(raw_ly + raw_ry);     /* ç«–å‘å’Œï¼ˆåŸå§‹ï¼‰*/
-    ss_now = (uint16)(raw_lx + raw_rx);     /* æ¨ªå‘å’Œï¼ˆåŸå§‹ï¼‰*/
+    sv_now = (uint16)(raw_ly + raw_ry);     /* ÊúÏòºÍ£¨Ô­Ê¼£© */
+    ss_now = (uint16)(raw_lx + raw_rx);     /* ºáÏòºÍ£¨Ô­Ê¼£© */
 
-    /* â‘¡ å·®æ¯”å’Œ */
+    /* 2. ²î±ÈºÍ */
     error = calc_error(lh, rh);
 
-    /* â‘¢ æ›²ç‡ç³»æ•° + é¢„åˆ¤å¢ç›Š */
+    /* 3. ÇúÂÊÏµÊı + Ô¤ÅĞÔöÒæ */
     curv_update();
 
-    /* â‘£ æ–¹å‘ç¯ï¼šè¿› PID å‰ä¹˜é¢„åˆ¤å¢ç›Š */
+    /* 4. ·½Ïò»·£º½ø PID Ç°³ËÔ¤ÅĞÔöÒæ */
     err_in = (int16)((float)error * k_pred);
     if(err_in >  100) err_in =  100;
     if(err_in < -100) err_in = -100;
 
     Positional_PID_Calc(&servo_pid, 0.0f, (float)err_in);
 
-    /* æ­»åŒºè¡¥å¿ï¼šè¾“å‡ºå¤ªå°å°±ç»™å›ºå®šæœ€å°å€¼ï¼Œè®©èˆµæœºçœŸçš„èƒ½è½¬ */
+    /* ÊäÈëËÀÇø£º|error*K| Ì«Ğ¡¾Í²»´ò½Ç£¨Ö±µÀ·À¶¶£»ÎŞËÀÇø²¹³¥£© */
+    if((err_in > -(int16)E_DEAD) && (err_in < (int16)E_DEAD))
+    {
+        servo_pid.output = 0.0f;
+    }
+
     out = (int16)servo_pid.output;
-    if((out > 0) && (out < (int16)SERVO_DEAD))
-    {
-        out = (int16)SERVO_MIN;
-    }
-    else if((out < 0) && (out > -(int16)SERVO_DEAD))
-    {
-        out = -(int16)SERVO_MIN;
-    }
-    servo_out = out;
 
     if(out >  (int16)SERVO_MAX_OUT) out =  (int16)SERVO_MAX_OUT;
     if(out < -(int16)SERVO_MAX_OUT) out = -(int16)SERVO_MAX_OUT;
 
+    servo_out  = out;
     servo_duty = (int16)(SERVO_MID + out);
     Set_Servo_PWM((int32)servo_duty);
 
-    /* â‘¤ åœ†ç¯å¼€ç¯ï¼šåˆ°ç‚¹å¼ºåˆ¶æ‰“è§’ï¼ˆè¦†ç›–ä¸Šé¢ï¼‰*/
+    /* 5. Ô²»·¿ª»·£ºµ½µãÇ¿ÖÆ´ò½Ç£¨¸²¸ÇÉÏÃæ£© */
     ring_force();
 
-    /* â‘¥ ç¼–ç å™¨ â†’ ä½é€š â†’ é€Ÿåº¦ç¯ */
+    /* 6. ±àÂëÆ÷ -> µÍÍ¨ -> ËÙ¶È»· */
     speed_l = (int16)encoder_get_count(ENCODER1, 0);
     speed_r = (int16)encoder_get_count(ENCODER2, 1);
     L_encoder = speed_l;
@@ -203,11 +194,11 @@ void TM4_Isr() interrupt 20
         sl = enc_acc_l;  enc_acc_l = 0;
         sr = enc_acc_r;  enc_acc_r = 0;
 
-        /* ç¼–ç å™¨ä¸€é˜¶ä½é€šï¼ˆå¯¹ 10ms ç´¯åŠ å€¼æ»¤æ³¢ï¼‰*/
+        /* ±àÂëÆ÷Ò»½×µÍÍ¨£¨¶Ô 10ms ÀÛ¼ÓÖµÂË²¨£© */
         enc_f_l = enc_f_l + ENC_ALPHA * ((float)sl - enc_f_l);
         enc_f_r = enc_f_r + ENC_ALPHA * ((float)sr - enc_f_r);
 
-        /* ç›®æ ‡ï¼šä¸¤è½®åŒé€Ÿï¼ˆæ— å·®é€Ÿï¼‰*/
+        /* Ä¿±ê£ºÁ½ÂÖÍ¬ËÙ£¨ÎŞ²îËÙ£© */
         tl = (int16)(TARGET_SPEED_BASE * SPEED_SAMPLE_DIV);
         tr = tl;
 
