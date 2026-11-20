@@ -137,8 +137,8 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define RING_MOTOR_DUTY   -10000    /* ?? 圆环内电机固定占空比（负数=前进） */
 
 /*------------ 带差速的速度环：仅在这个时间段生效 ------------*/
-#define DIFF_T_START        0     /* ?? 0 秒：全程启用速度环差速 */
-#define DIFF_T_END      60000     /* ?? 60000×5ms = 300 秒：等于全程 */
+#define DIFF_T_START        0     /* 纯净版：差速关闭 */
+#define DIFF_T_END          0     /* 纯净版：差速关闭（窗口为空）*/
 #define DIFF_T2_START       0     /* 备用窗口（未用） */
 #define DIFF_T2_END         0     /* 备用窗口（未用） */
 
