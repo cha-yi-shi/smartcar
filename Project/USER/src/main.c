@@ -1,12 +1,12 @@
 /*********************************************************************************************************************
  * COPYRIGHT NOTICE
- * Copyright (c) 2020,Öğ·É¿Æ¼¼
+ * Copyright (c) 2020,é€é£ç§‘æŠ€
  * All rights reserved.
- * ÒÔÏÂËùÓĞÄÚÈİ°æÈ¨¾ùÊôÖğ·É¿Æ¼¼ËùÓĞ£¬Î´¾­ÔÊĞí²»µÃÓÃÓÚÉÌÒµÓÃÍ¾£¬
- * »¶Ó­¸÷Î»Ê¹ÓÃ²¢´«²¥±¾³ÌĞò£¬ĞŞ¸ÄÄÚÈİÊ±±ØĞë±£ÁôÖğ·É¿Æ¼¼µÄ°æÈ¨ÉùÃ÷¡£
+ * ä»¥ä¸‹æ‰€æœ‰å†…å®¹ç‰ˆæƒå‡å±é€é£ç§‘æŠ€æ‰€æœ‰ï¼Œæœªç»å…è®¸ä¸å¾—ç”¨äºå•†ä¸šç”¨é€”ï¼Œ
+ * æ¬¢è¿å„ä½ä½¿ç”¨å¹¶ä¼ æ’­æœ¬ç¨‹åºï¼Œä¿®æ”¹å†…å®¹æ—¶å¿…é¡»ä¿ç•™é€é£ç§‘æŠ€çš„ç‰ˆæƒå£°æ˜ã€‚
  *
  * @file       		main
- * @company	   		³É¶¼Öğ·É¿Æ¼¼ÓĞÏŞ¹«Ë¾
+ * @company	   		æˆéƒ½é€é£ç§‘æŠ€æœ‰é™å…¬å¸
  * @Software 		MDK FOR C251 V5.60
  * @Target core		STC32G12K128
  ********************************************************************************************************************/
@@ -14,35 +14,21 @@
 #include "headfile.h"
 #include "encoder.h"
 #include "motor.h"
-#include "key.h"
 #include "code.h"
-#include "seekfree_assistant.h"
 #include <string.h>
 
-
 /*
- * ÏµÍ³ÆµÂÊ£¬¿É²é¿´board.hÖĞµÄ FOSC ºê¶¨ÒåĞŞ¸Ä¡£
- * board.hÎÄ¼şÖĞFOSCµÄÖµÉèÖÃÎª0,Ôò³ÌĞò×Ô¶¯ÉèÖÃÏµÍ³ÆµÂÊÎª33.1776MHZ
- * ÔÚboard_initÖĞ,ÒÑ¾­½«P54Òı½ÅÉèÖÃÎª¸´Î»
+ * v3ï¼šç”µæ„Ÿï¼ˆè‡ªé€‚åº”çª—å£å»æå€¼ + ä¸€é˜¶ä½é€šï¼‰â†’ å·®æ¯”å’Œ â†’ æ›²ç‡ç³»æ•° â†’ é¢„åˆ¤å¢ç›Š
+ *      â†’ ä½ç½®å¼ PIDï¼ˆæ–¹å‘ï¼‰+ æ­»åŒºè¡¥å¿ â†’ èˆµæœº
+ *      â†’ ç¼–ç å™¨ï¼ˆä¸€é˜¶ä½é€šï¼‰â†’ å¢é‡å¼ PIDï¼ˆé€Ÿåº¦ï¼‰â†’ ä¸¤è½®åŒé€Ÿ
  */
 
 char txt[60];
 extern int L_encoder,R_encoder;
-int SW1,SW2,SW3,SW4;
-uint16 adc1,adc2,adc3,adc4;
-
-/*-------------------------------------------------------------------------------------------------------------------
- *  L6 6.2.2 µÚ¢Ù²½£º×¢²á"·¢ËÍº¯Êı"£¬¸æËß×é¼şÊı¾İ´ÓÄÄ¸ö´®¿Ú·¢³öÈ¥
- *------------------------------------------------------------------------------------------------------------------*/
-uint32 assistant_transfer_cb(const uint8 *buff, uint32 length)
-{
-    uart_putbuff(DEBUG_UART, (uint8 *)buff, (uint16)length);
-    return length;
-}
 
 void main()
 {
-	board_init();			// ³õÊ¼»¯¼Ä´æÆ÷,ÎğÉ¾³ı´Ë¾ä´úÂë¡£
+	board_init();			// åˆå§‹åŒ–å¯„å­˜å™¨,å‹¿åˆ é™¤æ­¤å¥ä»£ç ã€‚
 
 	lcd_init();
     Motor_Init();
@@ -50,73 +36,57 @@ void main()
     encoder_init(ENCODER1);
 	encoder_init(ENCODER2);
 
-    key_list_init(5);                       /* °´¼ü 5ms É¨Ãè£¨¸ú¿ØÖÆÖÜÆÚÒ»ÖÂ£© */
-
-    /* L4 4.3£ºËÄÂ·µç¸ĞÍ¨µÀ¸÷³õÊ¼»¯Ò»´Î£¨ÕÕ CarDemo1£ºP0.0 ~ P0.3£© */
+    /* å››è·¯ç”µæ„Ÿé€šé“å„åˆå§‹åŒ–ä¸€æ¬¡ï¼ˆP0.0 ~ P0.3ï¼‰ */
     adc_init(ADC_LEFTX_CHANNEL,  ADC_SYSclk_DIV_2);
     adc_init(ADC_RIGHTX_CHANNEL, ADC_SYSclk_DIV_2);
     adc_init(ADC_LEFTY_CHANNEL,  ADC_SYSclk_DIV_2);
     adc_init(ADC_RIGHTY_CHANNEL, ADC_SYSclk_DIV_2);
 
-    pwm_init(PWMB_CH1_P74,50,650);          /* ¶æ»ú 50Hz£¨ÕÕ CarDemo1£© */
+    /* é€šé“ç»“æ„ä½“åˆå§‹åŒ– */
+    ch_lx.ch = ADC_LEFTX_CHANNEL;   ch_lx.max = LX_MAX;   ch_lx.min = LX_MIN;
+    ch_rx.ch = ADC_RIGHTX_CHANNEL;  ch_rx.max = RX_MAX;   ch_rx.min = RX_MIN;
+    ch_ly.ch = ADC_LEFTY_CHANNEL;   ch_ly.max = LY_MAX;   ch_ly.min = LY_MIN;
+    ch_ry.ch = ADC_RIGHTY_CHANNEL;  ch_ry.max = RY_MAX;   ch_ry.min = RY_MIN;
 
-    /* L4 4.8.2£º·½Ïò»·£¨Î»ÖÃÊ½ PID£© */
+    pwm_init(PWMB_CH1_P74,50,650);          /* èˆµæœº 50Hz */
+
+    /* æ–¹å‘ç¯ï¼šä½ç½®å¼ PID */
     Positional_PID_Init(&servo_pid, SERVO_KP, SERVO_KI, SERVO_KD, SERVO_MAX_I, SERVO_MAX_OUT);
 
-    /* L5 5.3£ºËÙ¶È»·£¨ÔöÁ¿Ê½ PI£© */
+    /* é€Ÿåº¦ç¯ï¼šå¢é‡å¼ PID */
     Incremental_PID_Init(&left_pid,  SPEED_KP, SPEED_KI, SPEED_KD, SPEED_MAX_OUT);
     Incremental_PID_Init(&right_pid, SPEED_KP, SPEED_KI, SPEED_KD, SPEED_MAX_OUT);
 
-    pit_timer_ms(TIM_4,5);                  /* 5ms ¿ØÖÆÖÜÆÚ£¨µç¸ĞÃ¿ 5ms ¶ÁÒ»´Î£© */
+    pit_timer_ms(TIM_4,5);                  /* 5ms æ§åˆ¶å‘¨æœŸ */
 
     while(1)
     {
 #if (LCD_DEBUG == 1)
-        /* ===================== ÒÔÏÂ 6 ĞĞÍêÈ«ÕÕ CarDemo1 Ô­Ñù ===================== */
-        sprintf(txt,"L:%d,R:%d         ",L_encoder,R_encoder);
+        sprintf(txt,"Sv:%d Ss:%d      ",sv_now,ss_now);
         lcd_showstr(0,0,(int8 *)txt);
 
-        sprintf(txt,"Key4:%d  Key3:%d         ",key_cnt4,key_cnt3);
+        sprintf(txt,"E:%d dE:%d      ",error,de_now);
         lcd_showstr(0,1,(int8 *)txt);
 
-        sprintf(txt,"Key2:%d  Key1:%d         ",key_cnt2,key_cnt1);
+        sprintf(txt,"C:%d K:%d      ",(int16)(curv*100.0f),(int16)(k_pred*10.0f));
         lcd_showstr(0,2,(int8 *)txt);
 
-        SW1 = P64;
-        SW2 = P65;
-        SW3 = P66;
-        SW4 = P67;
-
-        /* µÚ 3 ĞĞ£ºÀÛ¼ÆÂ·³Ì£¨Âö³å£©£¬ÓÃÓÚ±ê¶¨Ã¿È¦Âö³åÊı */
-        sprintf(txt,"A:%d,%d M:%d    ",avg_l,avg_r,peak_l);
+        sprintf(txt,"O:%d D:%d      ",servo_out,servo_duty);
         lcd_showstr(0,3,(int8 *)txt);
 
-        /* adc ÓÃÖĞ¶ÏÀïÒÑ¾­²ÉºÃµÄÔ­Ê¼Öµ£¬±ÜÃâÖ÷Ñ­»·ºÍÖĞ¶ÏÍ¬Ê±²Ù×÷ ADC */
-        adc1 = raw_lx;
-        adc2 = raw_rx;
-        adc3 = raw_ly;
-        adc4 = raw_ry;
-
-        sprintf(txt,"adc1:%d  adc2:%d         ",adc1,adc2);
+        sprintf(txt,"a1:%d a2:%d      ",raw_lx,raw_rx);
         lcd_showstr(0,4,(int8 *)txt);
 
-        sprintf(txt,"adc3:%d  adc4:%d         ",adc3,adc4);
+        sprintf(txt,"a3:%d a4:%d      ",raw_ly,raw_ry);
         lcd_showstr(0,5,(int8 *)txt);
-        /* ===================== ÒÔÉÏÎª CarDemo1 Ô­ÓĞÏÔÊ¾ ===================== */
 
-        /* ------------------- L4 / L5 µ÷ÊÔÏÔÊ¾£¨½ÓÔÚÏÂÃæ¼¸ĞĞ£© ------------------- */
-        sprintf(txt,"N:%d %d %d %d      ",lh,rh,lv,rv);
+        sprintf(txt,"L:%d R:%d      ",L_encoder,R_encoder);
         lcd_showstr(0,6,(int8 *)txt);
 
-        sprintf(txt,"T:%d E:%d      ",force_start_tick,error);
+        sprintf(txt,"M:%d,%d        ",motor_l,motor_r);
         lcd_showstr(0,7,(int8 *)txt);
-
-        sprintf(txt,"D:%d V:%d      ",duty_diff,speed_now);
-        lcd_showstr(0,8,(int8 *)txt);
-
 
         delay_ms(1);
 #endif
-        /* ÆÁÄ»´òÓ¡ÒÑ¹Ø±Õ£ºLCD_DEBUG = 0 Ê±²»Ö´ĞĞ£¬½ÚÊ¡Ö÷Ñ­»·Ê±¼ä */
     }
 }

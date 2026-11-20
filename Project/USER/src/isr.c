@@ -1,24 +1,23 @@
 /*********************************************************************************************************************
  * COPYRIGHT NOTICE
- * Copyright (c) 2020,Öğ·É¿Æ¼¼
+ * Copyright (c) 2020,é€é£ç§‘æŠ€
  * All rights reserved.
- * ÒÔÏÂËùÓĞÄÚÈİ°æÈ¨¾ùÊôÖğ·É¿Æ¼¼ËùÓĞ£¬Î´¾­ÔÊĞí²»µÃÓÃÓÚÉÌÒµÓÃÍ¾£¬
- * »¶Ó­¸÷Î»Ê¹ÓÃ²¢´«²¥±¾³ÌĞò£¬ĞŞ¸ÄÄÚÈİÊ±±ØĞë±£ÁôÖğ·É¿Æ¼¼µÄ°æÈ¨ÉùÃ÷¡£
+ * ä»¥ä¸‹æ‰€æœ‰å†…å®¹ç‰ˆæƒå‡å±é€é£ç§‘æŠ€æ‰€æœ‰ï¼Œæœªç»å…è®¸ä¸å¾—ç”¨äºå•†ä¸šç”¨é€”ï¼Œ
+ * æ¬¢è¿å„ä½ä½¿ç”¨å¹¶ä¼ æ’­æœ¬ç¨‹åºï¼Œä¿®æ”¹å†…å®¹æ—¶å¿…é¡»ä¿ç•™é€é£ç§‘æŠ€çš„ç‰ˆæƒå£°æ˜ã€‚
  *
  * @file       		isr
- * @company	   		³É¶¼Öğ·É¿Æ¼¼ÓĞÏŞ¹«Ë¾
+ * @company	   		æˆéƒ½é€é£ç§‘æŠ€æœ‰é™å…¬å¸
  * @Software 		MDK FOR C251 V5.60
  * @Target core		STC32G12K128
  ********************************************************************************************************************/
 #include "headfile.h"
 #include "encoder.h"
-#include "key.h"
 #include "motor.h"
 #include "code.h"
 
 int L_encoder=0,R_encoder=0;
 
-//UART1ÖĞ¶Ï
+//UART1ä¸­æ–­
 void UART1_Isr() interrupt 4
 {
     uint8 res;
@@ -32,7 +31,7 @@ void UART1_Isr() interrupt 4
     {
         UART1_CLEAR_RX_FLAG;
         res = SBUF;
-        //³ÌĞò×Ô¶¯ÏÂÔØ
+        //ç¨‹åºè‡ªåŠ¨ä¸‹è½½
         if(res == 0x7F)
         {
             if(dwon_count++ > 20)
@@ -45,7 +44,7 @@ void UART1_Isr() interrupt 4
     }
 }
 
-//UART2ÖĞ¶Ï
+//UART2ä¸­æ–­
 void UART2_Isr() interrupt 8
 {
     if(UART2_GET_TX_FLAG)
@@ -56,13 +55,11 @@ void UART2_Isr() interrupt 8
     if(UART2_GET_RX_FLAG)
 	{
         UART2_CLEAR_RX_FLAG;
-		//½ÓÊÕÊı¾İ¼Ä´æÆ÷Îª£ºS2BUF
 		gps_uart_callback(S2BUF);
 	}
 }
 
-
-//UART3ÖĞ¶Ï
+//UART3ä¸­æ–­
 void UART3_Isr() interrupt 17
 {
     if(UART3_GET_TX_FLAG)
@@ -73,13 +70,10 @@ void UART3_Isr() interrupt 17
     if(UART3_GET_RX_FLAG)
 	{
         UART3_CLEAR_RX_FLAG;
-		//½ÓÊÕÊı¾İ¼Ä´æÆ÷Îª£ºS3BUF
-
 	}
 }
 
-
-//UART4ÖĞ¶Ï
+//UART4ä¸­æ–­
 void UART4_Isr() interrupt 18
 {
     if(UART4_GET_TX_FLAG)
@@ -90,12 +84,8 @@ void UART4_Isr() interrupt 18
     if(UART4_GET_RX_FLAG)
 	{
         UART4_CLEAR_RX_FLAG;
-
-		//½ÓÊÕÊı¾İ¼Ä´æÆ÷Îª£ºS4BUF;
 		if(wireless_module_uart_handler != NULL)
 		{
-			// ¸Ãº¯ÊıÎªº¯ÊıÖ¸Õë
-			// ÔÙ³õÊ¼»¯ÎŞÏßÄ£¿éµÄÊ±ºò£¬ÉèÖÃ¸Ãº¯ÊıµØÖ·
 			wireless_module_uart_handler(S4BUF);
 		}
 	}
@@ -108,185 +98,121 @@ void INT0_Isr() interrupt 0
 }
 void INT1_Isr() interrupt 2
 {
-	
 }
-
-
-//INT2ºÍINT3×÷Îª±àÂëÆ÷ÊäÈë£¬²»ÔÊĞíÔÙÊ¹ÓÃ
-//void INT2_Isr() interrupt 10
-//{
-//	INT2_CLEAR_FLAG;  //Çå³ıÖĞ¶Ï±êÖ¾
-//}
-//void INT3_Isr() interrupt 11
-//{
-//	INT3_CLEAR_FLAG;  //Çå³ıÖĞ¶Ï±êÖ¾
-//}
-
 
 void INT4_Isr() interrupt 16
 {
-	INT4_CLEAR_FLAG;  //Çå³ıÖĞ¶Ï±êÖ¾
+	INT4_CLEAR_FLAG;
 }
 
-/*-------------------------------------------------------------------------------------------------------------------
- *  TM0£ºCarDemo1 ÀïÓÃÀ´¶Á±àÂëÆ÷£¨20ms£©£¬±¾¹¤³Ì°Ñ±àÂëÆ÷¶ÁÈ¡·Åµ½ÁË TM4 Àï£¬
- *       ËùÒÔÕâÀï±£³Ö¿Õº¯Êı¼´¿É£¨Ò²Ã»Æô¶¯ TIM_0£©
- *------------------------------------------------------------------------------------------------------------------*/
 void TM0_Isr() interrupt 1
 {
-
 }
 void TM1_Isr() interrupt 3
 {
-
 }
 void TM2_Isr() interrupt 12
 {
-	TIM2_CLEAR_FLAG;  //Çå³ıÖĞ¶Ï±êÖ¾
-	
+	TIM2_CLEAR_FLAG;
 }
 void TM3_Isr() interrupt 19
 {
-	TIM3_CLEAR_FLAG; //Çå³ıÖĞ¶Ï±êÖ¾
-	
+	TIM3_CLEAR_FLAG;
 }
 
 /*-------------------------------------------------------------------------------------------------------------------
- *  TM4£º5ms ¿ØÖÆÖÜÆÚ£¨µç¸ĞÃ¿ 5ms ¶ÁÒ»´Î£©
- *      ¢Ù ²Éµç¸Ğ ¡ú ÂË²¨ ¡ú ¹éÒ»»¯      £¨L4 4.4 ~ 4.5£©
- *      ¢Ú ²î±ÈºÍ ¡ú Æ«²î error          £¨L4 4.6£©
- *      ¢Û ÔªËØ×´Ì¬»úĞŞÕı error         £¨L6 6.4£©
- *      ¢Ü ·½Ïò»· PID ¡ú ¶æ»ú´ò½Ç        £¨L4 4.8£©
- *      ¢İ ¶Á±àÂëÆ÷ ¡ú ËÙ¶È»· ¡ú µç»ú     £¨L5 5.2 ~ 5.3£©
- *  ÖĞ¶ÏÀï²»ÑÓÊ±¡¢²»µÈ´ı¡¢²»´òÓ¡
+ *  TM4ï¼š5ms æ§åˆ¶å‘¨æœŸ
+ *      â‘  é‡‡ 4 è·¯ç”µæ„Ÿ â†’ çª—å£å»æå€¼å¹³å‡ â†’ ä¸€é˜¶ä½é€š â†’ å½’ä¸€åŒ–
+ *      â‘¡ å·®æ¯”å’Œ â†’ error
+ *      â‘¢ æ›²ç‡ç³»æ•° curv â†’ é¢„åˆ¤å¢ç›Š K
+ *      â‘£ error Ã— K â†’ ä½ç½®å¼ PID â†’ æ­»åŒºè¡¥å¿ â†’ èˆµæœº
+ *      â‘¤ åœ†ç¯å¼€ç¯å¼ºåˆ¶æ‰“è§’ï¼ˆåˆ°ç‚¹è¦†ç›–ï¼‰
+ *      â‘¥ ç¼–ç å™¨ â†’ ä¸€é˜¶ä½é€š â†’ å¢é‡å¼ PID â†’ ç”µæœºï¼ˆä¸¤è½®åŒé€Ÿï¼‰
+ *  ä¸­æ–­é‡Œä¸å»¶æ—¶ã€ä¸ç­‰å¾…ã€ä¸æ‰“å°
  *------------------------------------------------------------------------------------------------------------------*/
 void TM4_Isr() interrupt 20
 {
-#if (RING_PID_ENABLE == 1)
-    uint8 ring_now;                              /* 1 = µ±Ç°´¦ÓÚÔ²»·¶Î */
-#endif
-	TIM4_CLEAR_FLAG; //Çå³ıÖĞ¶Ï±êÖ¾
-	key_handler();   //°´¼üÉ¨Ãè£¨L3 3.3.2£©
+    int16  tl, tr, sl, sr, dl, dr;
+    int16  out;
 
-    /* ¢Ù ²ÉÑù ¡ú ÂË²¨ ¡ú ¹éÒ» */
-    lh = normalize(&ch_lx);
-    rh = normalize(&ch_rx);
-    lv = normalize(&ch_ly);
-    rv = normalize(&ch_ry);
+    TIM4_CLEAR_FLAG;                        /* æ¸…é™¤ä¸­æ–­æ ‡å¿— */
 
-    /* ¢Ú ²î±ÈºÍ */
+    if(run_tick < 60000) run_tick++;        /* ä¸Šç”µè®¡æ—¶ï¼ˆ5ms ä¸€æ‹ï¼‰ */
+
+    /* â‘  å››è·¯ç”µæ„Ÿï¼šé‡‡é›† â†’ å»æå€¼å¹³å‡ â†’ ä½é€š â†’ å½’ä¸€åŒ– */
+    lh = adc_proc(&ch_lx);
+    rh = adc_proc(&ch_rx);
+    lv = adc_proc(&ch_ly);
+    rv = adc_proc(&ch_ry);
+
+    raw_lx = ch_lx.val;
+    raw_rx = ch_rx.val;
+    raw_ly = ch_ly.val;
+    raw_ry = ch_ry.val;
+
+    sv_now = (uint16)(raw_ly + raw_ry);     /* ç«–å‘å’Œï¼ˆåŸå§‹ï¼‰*/
+    ss_now = (uint16)(raw_lx + raw_rx);     /* æ¨ªå‘å’Œï¼ˆåŸå§‹ï¼‰*/
+
+    /* â‘¡ å·®æ¯”å’Œ */
     error = calc_error(lh, rh);
 
-    /* ¢Û ÔªËØ×´Ì¬»úĞŞÕı£¨ELEM_ENABLE = 0 Ê±Ê²Ã´¶¼²»×ö£© */
-    elem_check(lh, rh, lv, rv);                   /* Ô²»·£ºËÄÂ·ºÍ´¥·¢ */
-    error = elem_correct(error);
+    /* â‘¢ æ›²ç‡ç³»æ•° + é¢„åˆ¤å¢ç›Š */
+    curv_update();
 
+    /* â‘£ æ–¹å‘ç¯ï¼šè¿› PID å‰ä¹˜é¢„åˆ¤å¢ç›Š */
+    err_in = (int16)((float)error * k_pred);
+    if(err_in >  100) err_in =  100;
+    if(err_in < -100) err_in = -100;
 
-    /* ¢Û-c Ö±µÀ / ÍäµÀ ÅĞ¶¨£ºÍ¬Ê±¾ö¶¨ ËÙ¶È ºÍ ÓÃÄÄÌ× PID */
-    speed_now = speed_decide(error);
+    Positional_PID_Calc(&servo_pid, 0.0f, (float)err_in);
 
-    /* ¢Ü ·½Ïò»· ¡ú ¶æ»ú£¨ÓÃÉÏÃæÑ¡ºÃµÄ PID£© */
-#if (RING_PID_ENABLE == 1)
-    /* ===== Ô²»·¶Î£º»»ÓÃ¶ÀÁ¢ PID£¨RING_KP=4£©£¬ÆäËû²ÎÊı²»±ä ===== */
-    ring_now = (uint8)((run_tick >= RING_ACTIVE_START) && (run_tick < RING_ACTIVE_END));
-    if(ring_now)
+    /* æ­»åŒºè¡¥å¿ï¼šè¾“å‡ºå¤ªå°å°±ç»™å›ºå®šæœ€å°å€¼ï¼Œè®©èˆµæœºçœŸçš„èƒ½è½¬ */
+    out = (int16)servo_pid.output;
+    if((out > 0) && (out < (int16)SERVO_DEAD))
     {
-        servo_pid.kp = RING_KP;
-        servo_pid.ki = RING_KI;
-        servo_pid.kd = RING_KD;
+        out = (int16)SERVO_MIN;
     }
-    else
+    else if((out < 0) && (out > -(int16)SERVO_DEAD))
     {
-        servo_pid.kp = SERVO_KP;
-        servo_pid.ki = SERVO_KI;
-        servo_pid.kd = SERVO_KD;
+        out = -(int16)SERVO_MIN;
     }
-#else
-    servo_pid.kp = SERVO_KP;
-    servo_pid.ki = SERVO_KI;
-    servo_pid.kd = SERVO_KD;
-#endif
+    servo_out = out;
 
-    Positional_PID_Calc(&servo_pid, 0, (float)error);
+    if(out >  (int16)SERVO_MAX_OUT) out =  (int16)SERVO_MAX_OUT;
+    if(out < -(int16)SERVO_MAX_OUT) out = -(int16)SERVO_MAX_OUT;
 
-    /* ===== Ö±µÀ·À¶¶ËÀÇø£ºÊä³öÌ«Ğ¡¾Í²»´ò½Ç£¬±ÜÃâÖ±µÀ»­Áú ===== */
-    if((servo_pid.output > -SERVO_DEAD) && (servo_pid.output < SERVO_DEAD))
-    {
-        servo_pid.output = 0.0f;
-    }
-    Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
+    servo_duty = (int16)(SERVO_MID + out);
+    Set_Servo_PWM((int32)servo_duty);
 
+    /* â‘¤ åœ†ç¯å¼€ç¯ï¼šåˆ°ç‚¹å¼ºåˆ¶æ‰“è§’ï¼ˆè¦†ç›–ä¸Šé¢ï¼‰*/
+    ring_force();
 
-    /* ===== Ô²»·¿ª»·£ºµ½µãÇ¿ÖÆ×ó´ò£¬Ö®ºó½»»Ø²î±ÈºÍ ===== */
-    #if (RING_FORCE_ENABLE == 1)
-    if((run_tick >= force_start_tick) &&
-       (run_tick <  (force_start_tick + FORCE_TIME_TICK)))
-    {
-        Set_Servo_PWM((int32)FORCE_DUTY);
-    }
-    /* ³ö»·Ç¿ÖÆ´ò½ÇÒÑÍ£ÓÃ£¨°´ÒªÇóÖ»±£Áô½ø»·´ò½Ç£©
-    else if((run_tick >= FORCE_OUT_START) &&
-            (run_tick <  (FORCE_OUT_START + FORCE_OUT_TIME)))
-    {
-        Set_Servo_PWM((int32)FORCE_OUT_DUTY);
-    }
-    ===== ³ö»·Ç¿ÖÆ´ò½ÇÍ£ÓÃ½áÊø ===== */
-    #endif
-        /* ÁÙÊ±£ºÌø¹ı PID£¬°ÑÆ«²î·Å´ó 2 ±¶Ö±½Ó´ò¶æ */
-   // Set_Servo_PWM((int32)(SERVO_MID - (int32)(error * 2)));
-    /* ¢İ ¶Á±àÂëÆ÷ ¡ú ËÙ¶È»· ¡ú µç»ú */
+    /* â‘¥ ç¼–ç å™¨ â†’ ä½é€š â†’ é€Ÿåº¦ç¯ */
     speed_l = (int16)encoder_get_count(ENCODER1, 0);
     speed_r = (int16)encoder_get_count(ENCODER2, 1);
     L_encoder = speed_l;
     R_encoder = speed_r;
 
-    /* ÀÛ¼ÆÂ·³Ì£¨Âö³å£©£ºÓÃÓÚ±ê¶¨"Ã¿È¦¶àÉÙ¸öÂö³å" */
-    total_l += speed_l;
-    total_r += speed_r;
-
-    /* Æ½»¬ËÙ¶È£¨Ê±¼ä³£ÊıÔ¼ 8¡Á5ms = 40ms£©Óë·åÖµ£¬ÓÃÓÚ±ê¶¨ */
-    /* Æ½¾ù£ºÏÈÀÛ¼Ó 16 ¸öÑù±¾£¨80ms£©ÔÙ³ı£¬±ÜÃâÕûÊı½Ø¶ÏÎó²î */
-    avg_sum_l += speed_l;
-    avg_sum_r += speed_r;
-    avg_cnt++;
-    if(avg_cnt >= 16)
-    {
-        avg_l = (int16)(avg_sum_l / 16);
-        avg_r = (int16)(avg_sum_r / 16);
-        avg_sum_l = 0;
-        avg_sum_r = 0;
-        avg_cnt = 0;
-    }
-    if(speed_l < peak_l)  peak_l = speed_l;        /* Ç°½øÎª¸º£¬È¡×î¸º = ×î¿ì */
-    if(speed_r < peak_r)  peak_r = speed_r;
-
-#if (RING_PID_ENABLE == 1)
-    /* ===== Ô²»·¶Î£ºµç»ú¹Ì¶¨Õ¼¿Õ±È£¨²»×ßËÙ¶È»·£©===== */
-    if(ring_now)
-    {
-        Motor_Set((int)RING_MOTOR_DUTY, (int)RING_MOTOR_DUTY);
-    }
-    else
-#endif
-    {
-#if (SPEED_LOOP_ENABLE == 1)
-    /* ===== ËÙ¶È»·£º20ms ÅĞ¶ÏÒ»´Î£¨4 ¸ö 5ms ÖÜÆÚÀÛ¼Ó£© =====
-       Ã¿¸ö 5ms °ÑÂö³åÀÛ¼Ó£¬Ã¿ SPEED_SAMPLE_DIV ´Î²Å×öÒ»´Î PID
-       ¡ú ·Ö±æÂÊ´Ó 13% ÌáÉıµ½ 3.3% */
     enc_acc_l += speed_l;
     enc_acc_r += speed_r;
-
     spd_div++;
+
     if(spd_div >= SPEED_SAMPLE_DIV)
     {
-        int16 tl, tr, dl, dr, sl, sr;
-
         spd_div = 0;
         sl = enc_acc_l;  enc_acc_l = 0;
         sr = enc_acc_r;  enc_acc_r = 0;
 
-        tl = (int16)(target_l * SPEED_SAMPLE_DIV);
-        tr = (int16)(target_r * SPEED_SAMPLE_DIV);
+        /* ç¼–ç å™¨ä¸€é˜¶ä½é€šï¼ˆå¯¹ 10ms ç´¯åŠ å€¼æ»¤æ³¢ï¼‰*/
+        enc_f_l = enc_f_l + ENC_ALPHA * ((float)sl - enc_f_l);
+        enc_f_r = enc_f_r + ENC_ALPHA * ((float)sr - enc_f_r);
+
+        /* ç›®æ ‡ï¼šä¸¤è½®åŒé€Ÿï¼ˆæ— å·®é€Ÿï¼‰*/
+        tl = (int16)(TARGET_SPEED_BASE * SPEED_SAMPLE_DIV);
+        tr = tl;
+
+        sl = (int16)enc_f_l;
+        sr = (int16)enc_f_r;
 
         dl = (int16)(sl - tl);
         dr = (int16)(sr - tr);
@@ -300,45 +226,9 @@ void TM4_Isr() interrupt 20
         if(left_pid.output  > 0.0f)  left_pid.output  = 0.0f;
         if(right_pid.output > 0.0f)  right_pid.output = 0.0f;
 #endif
-        Motor_Set((int)left_pid.output, (int)right_pid.output);
+
+        motor_l = (int16)left_pid.output;
+        motor_r = (int16)right_pid.output;
+        Motor_Set(motor_l, motor_r);
     }
-#else
-    /* ¿ª»·£º»ù´¡Õ¼¿Õ±È ¡À ²îËÙ */
-    {
-        int16 d_l, d_r;
-        d_l = (int16)(speed_now - duty_diff);      /* E>0 ¡ú ×óÂÖ¿ì */
-        d_r = (int16)(speed_now + duty_diff);      /* E>0 ¡ú ÓÒÂÖÂı */
-        if(d_l >  10000) d_l =  10000;
-        if(d_l < -10000) d_l = -10000;
-        if(d_r >  10000) d_r =  10000;
-        if(d_r < -10000) d_r = -10000;
-        Motor_Set(d_l, d_r);
-    }
-#endif
 }
-
-    }
-
-//void  INT0_Isr()  interrupt 0;
-//void  TM0_Isr()   interrupt 1;
-//void  INT1_Isr()  interrupt 2;
-//void  TM1_Isr()   interrupt 3;
-//void  UART1_Isr() interrupt 4;
-//void  ADC_Isr()   interrupt 5;
-//void  LVD_Isr()   interrupt 6;
-//void  PCA_Isr()   interrupt 7;
-//void  UART2_Isr() interrupt 8;
-//void  SPI_Isr()   interrupt 9;
-//void  INT2_Isr()  interrupt 10;
-//void  INT3_Isr()  interrupt 11;
-//void  TM2_Isr()   interrupt 12;
-//void  INT4_Isr()  interrupt 16;
-//void  UART3_Isr() interrupt 17;
-//void  UART4_Isr() interrupt 18;
-//void  TM3_Isr()   interrupt 19;
-//void  TM4_Isr()   interrupt 20;
-//void  CMP_Isr()   interrupt 21;
-//void  I2C_Isr()   interrupt 24;
-//void  USB_Isr()   interrupt 25;
-//void  PWM1_Isr()  interrupt 26;
-//void  PWM2_Isr()  interrupt 27;

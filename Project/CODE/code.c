@@ -1,388 +1,196 @@
 #include "code.h"
-#include "zf_function.h"
+#include "motor.h"
 
 /*===================================================================================================================
- *  È«¾Ö±äÁ¿¶¨Òå
+ *  å…¨å±€å˜é‡
  *==================================================================================================================*/
-adc_channel_t ch_lx = { ADC_LEFTX_CHANNEL,  LX_MAX, LX_MIN };
-adc_channel_t ch_rx = { ADC_RIGHTX_CHANNEL, RX_MAX, RX_MIN };
-adc_channel_t ch_ly = { ADC_LEFTY_CHANNEL,  LY_MAX, LY_MIN };
-adc_channel_t ch_ry = { ADC_RIGHTY_CHANNEL, RY_MAX, RY_MIN };
+adc_proc_t ch_lx, ch_rx, ch_ly, ch_ry;
 
-PID servo_pid;                  /* ·½Ïò»·£¨Î»ÖÃÊ½ PID£© */
-PID left_pid, right_pid;        /* ËÙ¶È»·£¨ÔöÁ¿Ê½ PI£© */
+PID servo_pid;
+PID left_pid, right_pid;
 
-int16 target_speed = TARGET_SPEED_DEFAULT;
-int16 target_duty  = TARGET_DUTY_DEFAULT;
+uint16 run_tick = 0;
 
-uint16 lh, rh, lv, rv;          /* ¹éÒ»»¯½á¹û */
-int16  error;                   /* Æ«²î */
-int16  speed_l, speed_r;        /* ×óÓÒËÙ¶È */
-
-uint16 raw_lx, raw_rx, raw_ly, raw_ry;  /* ÂË²¨ºóµÄÔ­Ê¼Öµ£¨ÆÁÄ»ÏÔÊ¾ÓÃ£© */
-
-volatile elem_state_enum elem_state = ELEM_NONE;
-uint16 elem_timer = 0;          /* µ±Ç°×´Ì¬µÄ¼ÆÊ±£¨µ¥Î» 10ms£© */
-uint8  elem_cnt   = 0;          /* Á¬ĞøÂú×ãÌõ¼şµÄÖÜÆÚÊı */
-uint8  ring_done = 0;           /* Ô²»·ÊÇ·ñÒÑ¾­ÅÜÍê£¨Ö»´¥·¢Ò»´Î£© */
-uint16 run_tick   = 0;                /* ÉÏµçºó¾­¹ıµÄ 10ms Êı */
-
-/* ÔËĞĞÊ±¿Éµ÷µÄ½ø»·Ê±¿Ì£¨P3.2 ¼Ó / P3.3 ¼õ£©£¬³õÖµ = FORCE_START_TICK */
-volatile uint16 force_start_tick = FORCE_START_TICK;
+uint16 lh = 0, rh = 0, lv = 0, rv = 0;
+uint16 raw_lx = 0, raw_rx = 0, raw_ly = 0, raw_ry = 0;
+uint16 sv_now = 0, ss_now = 0;
+int16  error = 0;
+int16  error_last = 0;
+int16  de_now = 0;
+float  curv = 0.0f;
+float  k_pred = 1.0f;
+int16  err_in = 0;
+int16  servo_out = 0;
+int16  servo_duty = 0;
+int16  speed_l = 0, speed_r = 0;
+float  enc_f_l = 0.0f, enc_f_r = 0.0f;
+int16  enc_acc_l = 0, enc_acc_r = 0;
+uint8  spd_div = 0;
+int16  motor_l = 0, motor_r = 0;
+uint8  curve_flag = 0;
 
 /*===================================================================================================================
- *  L4 4.4.3  È¥¼«ÖµÆ½¾ùÂË²¨
- *  ²É ADC_FILTER_NUM ´Î£¬È¥µô×î´ó×îĞ¡¸÷Ò»¸ö£¬Ê£ÏÂµÄÇóÆ½¾ù
+ *  å– n ä¸ªæ ·æœ¬å»æå€¼å¹³å‡
+ *  n = 5ï¼šå»æ‰æœ€å¤§æœ€å°ï¼Œå‰© 3 ä¸ªå¹³å‡
+ *  n = 3ï¼šå»æ‰æœ€å¤§æœ€å°ï¼Œå‰© 1 ä¸ªï¼ˆä¸­å€¼ï¼‰
  *==================================================================================================================*/
-uint16 adc_filter(ADCN_enum ch)
+static uint16 win_average(uint16 *buf, uint8 n)
 {
-    uint16 i, v, vmax = 0, vmin = 0xFFFF;
-    uint32 sum = 0;
+    uint16 i;
+    uint16 vmax, vmin;
+    uint32 sum;
 
-    for(i = 0; i < ADC_FILTER_NUM; i++)
+    if(0 == n) return 0;
+    if(1 == n) return buf[0];
+
+    vmax = buf[0];
+    vmin = buf[0];
+    sum  = 0;
+
+    for(i = 0; i < n; i++)
     {
-        v = adc_once(ch, ADC_12BIT);        /* 12 Î»£º0~4095 */
-        sum += v;
-        if(v > vmax) vmax = v;
-        if(v < vmin) vmin = v;
+        sum += buf[i];
+        if(buf[i] > vmax) vmax = buf[i];
+        if(buf[i] < vmin) vmin = buf[i];
     }
-    return (uint16)((sum - vmax - vmin) / (ADC_FILTER_NUM - 2));
+
+    /* å»æ‰æœ€å¤§æœ€å° */
+    sum = sum - vmax - vmin;
+
+    /* å‰© n-2 ä¸ª */
+    return (uint16)(sum / (uint16)(n - 2));
 }
 
 /*===================================================================================================================
- *  L4 4.5.2  ¹éÒ»»¯£º°Ñ [min, max] ÏßĞÔÓ³Éäµ½ [0, 100]
+ *  ADC é€šé“å¤„ç†ï¼ˆæ¯ 5ms è°ƒä¸€æ¬¡ï¼‰
+ *    â‘  é‡‡ä¸€æ¬¡ 12 ä½ ADC
+ *    â‘¡ å­˜å…¥ç¯å½¢ç¼“å†²
+ *    â‘¢ æŒ‰å½“å‰çª—å£ï¼ˆ5 æˆ– 3ï¼‰åšå»æå€¼å¹³å‡
+ *    â‘£ ä¸€é˜¶ä½é€šï¼šy += alpha * (x - y)ï¼Œalpha éš curv å˜åŒ–
+ *    â‘¤ å½’ä¸€åŒ–åˆ° 0~100
  *==================================================================================================================*/
-uint16 normalize(adc_channel_t *c)
+uint16 adc_proc(adc_proc_t *c)
 {
-    uint16 raw = adc_filter(c->ch);
+    uint16 raw;
+    uint16 m;
+    uint8  win;
+    float  alpha;
+    float  y;
 
-    /* Ë³±ã°ÑÔ­Ê¼Öµ´æÏÂÀ´£¬¸øÆÁÄ»ÏÔÊ¾ÓÃ£¨²»ÒªÔÚÖĞ¶ÏºÍÖ÷Ñ­»·ÀïÍ¬Ê±²É ADC£© */
-    if(c->ch == ADC_LEFTX_CHANNEL)       raw_lx = raw;
-    else if(c->ch == ADC_RIGHTX_CHANNEL) raw_rx = raw;
-    else if(c->ch == ADC_LEFTY_CHANNEL)  raw_ly = raw;
-    else if(c->ch == ADC_RIGHTY_CHANNEL) raw_ry = raw;
+    /* â‘  é‡‡ä¸€æ¬¡ */
+    raw = adc_once(c->ch, ADC_12BIT);
 
-    if(raw <= c->min) return 0;
-    if(raw >= c->max) return 100;
-    return (uint16)(((uint32)(raw - c->min) * 100) / (c->max - c->min));
+    /* â‘¡ ç¯å½¢ç¼“å†² */
+    c->buf[c->idx] = raw;
+    c->idx = (uint8)((c->idx + 1) % WIN_STRAIGHT);
+    if(c->cnt < WIN_STRAIGHT) c->cnt++;
+
+    /* â‘¢ çª—å£å¤§å°ï¼šç”±ä¸Šä¸€æ‹çš„ curv å†³å®šï¼ˆæ»å›ï¼‰ */
+    if((curv > WIN_UP) || ((curve_flag) && (curv > WIN_DOWN)))
+    {
+        win = WIN_CURVE;
+        curve_flag = 1;
+    }
+    else
+    {
+        win = WIN_STRAIGHT;
+        curve_flag = 0;
+    }
+    if(win > c->cnt) win = c->cnt;
+    if(win < 1)      win = 1;
+
+    /* æŠŠæœ€è¿‘ win ä¸ªæ ·æœ¬æ‹·å‡ºæ¥ï¼ˆä» idx å¾€å‰æ•°ï¼‰*/
+    {
+        uint16 tmp[WIN_STRAIGHT];
+        uint8  k;
+        uint8  pos;
+
+        for(k = 0; k < win; k++)
+        {
+            pos = (uint8)((c->idx + WIN_STRAIGHT - 1 - k) % WIN_STRAIGHT);
+            tmp[k] = c->buf[pos];
+        }
+        m = win_average(tmp, win);
+    }
+
+    /* â‘£ ä¸€é˜¶ä½é€š */
+    alpha = ALPHA_STRAIGHT + curv * (ALPHA_CURVE - ALPHA_STRAIGHT);
+    y = c->lpf;
+    y = y + alpha * ((float)m - y);
+    c->lpf = y;
+    c->val = (uint16)y;
+
+    /* â‘¤ å½’ä¸€åŒ– 0~100 */
+    if(c->val <= c->min) return 0;
+    if(c->val >= c->max) return 100;
+    return (uint16)(((uint32)(c->val - c->min) * 100) / (c->max - c->min));
 }
 
 /*===================================================================================================================
- *  L4 4.6.2  ²î±ÈºÍ£ºÆ«²î = (×ó - ÓÒ) / (×ó + ÓÒ) * 100£¬·¶Î§ -100~+100
+ *  å·®æ¯”å’Œï¼šåå·® = (å·¦ - å³) / (å·¦ + å³) * 100ï¼ŒèŒƒå›´ -100~+100
  *==================================================================================================================*/
 int16 calc_error(uint16 left, uint16 right)
 {
-    int32 diff = (int32)left - (int32)right;
-    int32 sum  = (int32)left + (int32)right;
+    int32 diff;
+    int32 sum;
 
-    return (int16)((diff * 100) / (sum + 1));       /* +1 ·ÀÖ¹³ıÁã */
+    diff = (int32)left - (int32)right;
+    sum  = (int32)left + (int32)right;
+
+    return (int16)((diff * 100) / (sum + 1));       /* +1 é˜²é™¤é›¶ */
 }
 
 /*===================================================================================================================
- *  L6 6.4.2  ÔªËØ×´Ì¬»ú
- *  ---------------------------------------------------------------------------------------------------------------
- *  Ö»ÓĞ ELEM_ENABLE == 1 Ê±²ÅÕæÕıÇĞ»»×´Ì¬£»·ñÔòÒ»Ö±±£³Ö ELEM_NONE£¨ÆÕÍ¨Â·¶Î£©
- *  ¹æÔò£¨L6 6.4.3£©£º
- *      ¢Ù Á¬ĞøÂú×ã N ¸öÖÜÆÚ²ÅÇĞ»»×´Ì¬£¬±ÜÃâ´Å³¡ÔëÉùÎóÅĞ
- *      ¢Ú Ã¿¸ö×´Ì¬¶¼ÓĞÍË³öÌõ¼ş + ³¬Ê±±£»¤
- *      ¢Û ÔªËØÆÚ¼äÖ»¸Ä"ĞŞÕıÁ¿"£¬²»ÁíĞ´Ò»Ì×¿ØÖÆ
+ *  æ›²ç‡ç³»æ•° + é¢„åˆ¤å¢ç›Š
+ *    fe = |error| / E_FULL      ï¼ˆè½¦å·²ç»åäº†å¤šå°‘ï¼‰
+ *    fd = |Î”error| / DE_FULL    ï¼ˆåå¾—å¤šå¿« = æ›²ç‡ï¼‰
+ *    curv = W_E*fe + W_D*fd
+ *    åå­—ï¼ˆSv â‰¥ CROSS_V_THï¼‰â†’ curv = 0
+ *    K = 1 + (K_MAX-1)*curv
  *==================================================================================================================*/
-void elem_check(uint16 lh_now, uint16 rh_now, uint16 lv_now, uint16 rv_now)
+void curv_update(void)
 {
-    uint16 sum_h;                      /* ºáÏòµç¸ĞºÍ£ºLX + RX */
-    uint16 sum_v;                      /* ÊúÏòµç¸ĞºÍ£ºLY + RY */
-    uint8  h_flag;                     /* ºáÏò´ï±ê */
-    uint8  v_flag;                     /* ÊúÏò´ï±ê */
-    uint8  both_flag;                  /* Á½ÕßÍ¬Ê±´ï±ê = ¼ì²âµ½"ãĞÖµ" */
+    float fe;
+    float fd;
+    int16 dea;
 
-    if(run_tick < 60000)  run_tick++;
+    /* Î”errorï¼ˆå¹¶åŠ æ­»åŒºï¼‰*/
+    de_now   = (int16)(error - error_last);
+    error_last = error;
 
-    sum_h = (uint16)(lh_now + rh_now);
-    sum_v = (uint16)(lv_now + rv_now);
+    dea = (de_now >= 0) ? de_now : -de_now;
+    if(dea < DE_DEAD) dea = 0;
 
-    h_flag = (sum_h > RING_H_TH) ? 1 : 0;
-    v_flag = (sum_v < RING_V_MAX) ? 1 : 0;    /* ÊúÏòÒª"¸É¾»"£¨Ğ¡ÓÚ 10£© */
+    /* feï¼šå½“å‰åå·® */
+    fe = ((float)((error >= 0) ? error : -error)) / E_FULL;
+    if(fe > 1.0f) fe = 1.0f;
 
-    both_flag = (uint8)(h_flag & v_flag);      /* ±ØĞëÍ¬Ê±´ï±ê²ÅËãÊı */
+    /* fdï¼šåå·®å˜åŒ– */
+    fd = ((float)dea) / DE_FULL;
+    if(fd > 1.0f) fd = 1.0f;
 
-#if (ELEM_ENABLE == 1)
-    switch(elem_state)
-    {
-        /*------------------ ¢Ù ½ø»·£ºÇ¿ÖÆ×ó´ò£¬Ö±µ½ºáÊú²»ÔÙÍ¬Ê±´ï±ê ------------------*/
-        case ELEM_ROUND_IN:
-            elem_timer++;
+    /* å åŠ  */
+    curv = W_E * fe + W_D * fd;
+    if(curv > 1.0f) curv = 1.0f;
 
-            /* ¶µµ×£º´ò½Ç×î¶à³ÖĞø RING_IN_MAX */
-            if(elem_timer > RING_IN_MAX)
-            {
-                elem_state = ELEM_ROUND_ON;
-                elem_timer = 0;
-                elem_cnt   = 0;
-                break;
-            }
+    /* åå­—ä¿æŠ¤ï¼šç«–å‘å’Œç‰¹åˆ«å¤§ â†’ æ›²ç‡å½’é›¶ï¼Œç»ä¸æ‰“è§’ */
+    if(sv_now >= CROSS_V_TH) curv = 0.0f;
 
-            /* ÖÁÉÙ´òÂú RING_IN_MIN£¬Ö®ºó both ÏûÊ§²ÅÍË³ö */
-            if((elem_timer > RING_IN_MIN) && (0 == both_flag))
-            {
-                elem_state = ELEM_ROUND_ON;
-                elem_timer = 0;
-                elem_cnt   = 0;
-            }
-            break;
-
-        /*------------------ ¢Ú »·ÄÚ£º²î±ÈºÍ£¬µÈ¡¾µÚ¶ş´Î¡¿¼ì²âµ½ãĞÖµ£¨³ö»·¿Ú£© ------------------*/
-        case ELEM_ROUND_ON:
-            elem_timer++;
-            if(elem_timer > RING_TIMEOUT)      /* ¶µµ×£ºµÈÌ«¾ÃÇ¿ÖÆ³ö»· */
-            {
-                elem_cnt   = 0;
-                elem_state = ELEM_ROUND_OUT;
-                elem_timer = 0;
-                break;
-            }
-            if((elem_timer > RING_ON_MIN) && both_flag)
-            {
-                if(++elem_cnt >= RING_COUNT)
-                {
-                    elem_cnt   = 0;
-                    elem_state = ELEM_ROUND_OUT;
-                    elem_timer = 0;
-                }
-            }
-            else
-            {
-                elem_cnt = 0;
-            }
-            break;
-
-        /*------------------ ¢Û ³ö»·£ºÇ¿ÖÆÓÒ´òÒ»Ğ¡¶Î ------------------*/
-        case ELEM_ROUND_OUT:
-            elem_timer++;
-            if(elem_timer > RING_OUT_TIME)
-            {
-                ring_done  = 1;                /* Ö®ºóÔÙÒ²²»ÏìÓ¦ãĞÖµ */
-                elem_state = ELEM_NONE;
-                elem_timer = 0;
-            }
-            break;
-
-        /*------------------ Ö±µÀ£ºÈ·ÈÏ ¡ú ÑÓÊ± ¡ú ½ø»· ------------------*/
-        default:
-            if(0 == ring_done)
-            {
-                if(both_flag)
-                {
-                    if(elem_cnt < RING_COUNT)          /* ½×¶Î¢Ù£ºÁ¬ĞøÈ·ÈÏ */
-                    {
-                        elem_cnt++;
-                    }
-                    else                               /* ½×¶Î¢Ú£ºÑÓÊ± RING_DELAY */
-                    {
-                        elem_timer++;
-                        if(elem_timer >= RING_DELAY)
-                        {
-                            elem_cnt   = 0;
-                            elem_timer = 0;
-                            elem_state = ELEM_ROUND_IN;
-                        }
-                    }
-                }
-                else                                   /* ãĞÖµÏûÊ§ ¡ú ÖØĞÂÈ·ÈÏ */
-                {
-                    elem_cnt   = 0;
-                    elem_timer = 0;
-                }
-            }
-            break;
-    }
-#else
-    elem_state = ELEM_NONE;
-    elem_timer = 0;
-#endif
+    /* é¢„åˆ¤å¢ç›Š */
+    k_pred = 1.0f + (K_MAX - 1.0f) * curv;
 }
 
 /*===================================================================================================================
- *  L6 6.4.2  ÔªËØÆÚ¼äÖ»¸ÄÆ«²î
- *      Ê®×Ö£ºÆ«²îÇåÁã£¬Ö±×Å³å¹ıÈ¥
- *      »·ÄÚ£º¶îÍâÍùÒ»²àÆ«£¬Ìù×Å»·×ß
- *      ³ö»·£ºÍù·´·½Ïò²¹Ò»µã
+ *  åœ†ç¯å¼€ç¯å¼ºåˆ¶æ‰“è§’ï¼šåˆ°ç‚¹å°±å›ºå®š dutyï¼Œè¦†ç›–æ–¹å‘ç¯
  *==================================================================================================================*/
-int16 elem_correct(int16 error_in)
+void ring_force(void)
 {
-    int16 out;
-
-    out = error_in;
-
-#if (ELEM_ENABLE == 1)
-    /* ½ø»·½×¶Î£º¼ì²âµ½ËÄÂ·ºÍ³¬¹ıãĞÖµ ¡ú Ç¿ÖÆ´ò½Ç£¨Íù×ó£© */
-    if(ELEM_ROUND_IN == elem_state)
+#if (RING_FORCE_ENABLE == 1)
+    if((run_tick >= FORCE_START_TICK) &&
+       (run_tick <  (FORCE_START_TICK + FORCE_TIME_TICK)))
     {
-        out = error_in + RING_BIAS;
-    }
-    /* ³ö»·½×¶Î£ºÇ¿ÖÆÍù·´·½Ïò´ò½Ç£¬°Ñ³µÍÆ³ö»· */
-    else if(ELEM_ROUND_OUT == elem_state)
-    {
-        out = error_in + RING_OUT_BIAS;
+        Set_Servo_PWM((int32)FORCE_DUTY);
+        servo_duty = FORCE_DUTY;
     }
 #endif
-
-    out = (int16)func_limit_ab(out, -100, 100);
-
-    return out;
-}
-
-/*===================================================================================================================
- *  ËÙ¶È¾ö²ß£ºÖ±µÀÂúÕ¼¿Õ±È£¬¼ì²âµ½ÍäµÀÁ¢¿Ì¼õËÙ£¨½â¾ö¼±Íä·´Ó¦²»¹ıÀ´£©
- *  ---------------------------------------------------------------------------------------------------------------
- *  ÅĞ¶¨·ÖÁ½Â·£¬
- *      |error|  > SPEED_E_ON   ¡ú ÒÑ¾­½øÍä
- *      |¦¤error| > SPEED_DE_ON  ¡ú Æ«²îÕıÔÚ¿ìËÙ±ä´ó = ¼±ÍäÈë¿Ú£¨±È |error| ¸üÔç·¢ÏÖ£©
- *  ¼õËÙºóÒªµÈ |error| < SPEED_E_OFF ÇÒÁ¬Ğø SPEED_HOLD ¸öÖÜÆÚ£¬²Å»Ö¸´ÂúËÙ£¨»Ø²î·À¶¶£©
- *==================================================================================================================*/
-int16 speed_now      = 0;           /* µ±Ç°ÏÂ·¢µÄÕ¼¿Õ±È */
-int16 error_last     = 0;           /* ÉÏÒ»ÖÜÆÚÆ«²î£¨Ëã ¦¤error ÓÃ£© */
-int16 target_l       = 0;           /* ×óÂÖËÙ¶È»·Ä¿±ê£¨»ù´¡ËÙ¶È + ²îËÙ£© */
-int16 target_r       = 0;           /* ÓÒÂÖËÙ¶È»·Ä¿±ê */
-int16 duty_diff      = 0;           /* ¿ª»·²îËÙÁ¿£¨Õ¼¿Õ±È£¬Õı = ×óÂÖÂı£© */
-int16 enc_acc_l     = 0;           /* ËÙ¶È»· 20ms ÀÛ¼Ó£º×óÂÖÂö³å */
-int16 enc_acc_r     = 0;           /* ËÙ¶È»· 20ms ÀÛ¼Ó£ºÓÒÂÖÂö³å */
-uint8 spd_div       = 0;           /* ËÙ¶È»··ÖÆµ¼ÆÊı */
-int32 total_l       = 0;           /* ×óÂÖÀÛ¼ÆÂö³å£¨Â·³Ì£© */
-int32 total_r       = 0;           /* ÓÒÂÖÀÛ¼ÆÂö³å */
-int16 avg_l         = 0;           /* Æ½»¬ËÙ¶È£¨40ms Æ½¾ù£¬±ê¶¨ÓÃ£© */
-int16 avg_r         = 0;           /* Æ½»¬ËÙ¶È£¨ÓÒ£© */
-int16 peak_l        = 0;           /* ·åÖµ£¨ÂúÕ¼¿Õ±È±ê¶¨ÓÃ£© */
-int16 peak_r        = 0;
-int32 avg_sum_l     = 0;           /* Æ½¾ùÓÃÀÛ¼ÓÆ÷£¨×ó£© */
-int32 avg_sum_r     = 0;           /* Æ½¾ùÓÃÀÛ¼ÓÆ÷£¨ÓÒ£© */
-uint8 avg_cnt       = 0;           /* Æ½¾ù²ÉÑù¼ÆÊı */
-uint8 speed_slowed   = 0;           /* 0 = ÂúËÙ  1 = ÒÑ¼õËÙ */
-uint8 speed_slow_cnt = 0;           /* ³öÍä¼ÆÊı */
-uint8 pid_state_prev = 0;           /* ÉÏÒ»ÖÜÆÚÓÃµÄÊÇÄÄÌ× PID£¨0 Ö±µÀ / 1 ÍäµÀ£© */
-uint8 speed_back_cnt = 0;           /* »ØÕıÍË³ö¼ÆÊı£¨³öÍäÌáÇ°ÇĞ KP£© */
-
-int16 speed_decide(int16 e)
-{
-    int16 de_s;
-    int16 de;
-    int16 ae;
-    int16 diff;
-    int16 diff2;                       /* ËÙ¶È»·ÓÃµÄ²îËÙ£¨Âö³åµ¥Î»£© */
-    int16 tgt_per;                     /* Ã¿ÖÜÆÚÆÚÍûÂ·³Ì£¨Âö³å£©= ËÙ¶È ¡Á ÖÜÆÚ */
-
-    de_s = (int16)(e - error_last);
-    error_last = e;
-
-    ae = (e    >= 0) ? e    : -e;
-    de = (de_s >= 0) ? de_s : -de_s;
-
-    if(0 == speed_slowed)
-    {
-        if((ae > SPEED_E_ON) || (de > SPEED_DE_ON))
-        {
-            speed_slowed   = 1;
-            speed_slow_cnt = 0;
-            speed_back_cnt = 0;
-        }
-    }
-    else
-    {
-        if(ae < SPEED_E_OFF)  speed_slow_cnt++;
-        else                  speed_slow_cnt = 0;
-
-        if(speed_slow_cnt >= SPEED_HOLD)
-        {
-            speed_slowed   = 0;
-            speed_slow_cnt = 0;
-            speed_back_cnt = 0;
-        }
-        /* Ö»Òª"ÕıÔÚ»ØÕı"¾ÍÁ¢¿ÌÇĞ»ØÖ±µÀ PID£¨²»ÔÙÒªÇó |E| ºÜĞ¡£© */
-        else if(((e > 0) && (de_s < -(int16)SPEED_DE_BACK)) ||
-                ((e < 0) && (de_s >  (int16)SPEED_DE_BACK)))
-        {
-            if(++speed_back_cnt >= SPEED_BACK_CNT)
-            {
-                speed_slowed   = 0;
-                speed_slow_cnt = 0;
-                speed_back_cnt = 0;
-            }
-        }
-        else
-        {
-            speed_back_cnt = 0;
-        }
-    }
-
-    /* ===== ²îËÙÒÑÍ£ÓÃ£¨°´ÒªÇó¸Ä³É´¿ËÙ¶È»· + ·½Ïò»·£©=====
-       Á½ÂÖÄ¿±êÍêÈ«Ò»Ñù£¬Ö»¿¿¶æ»ú×ªÏò
-       ĞèÒª»Ö¸´²îËÙÊ±£¬°ÑÏÂÃæ #if 0 ¸Ä³É #if 1 ¼´¿É
-    #if 0
-    diff  = (int16)(DIFF_DUTY_K * (float)e);
-    if(diff >  DIFF_DUTY_LIMIT)  diff =  DIFF_DUTY_LIMIT;
-    if(diff < -DIFF_DUTY_LIMIT)  diff = -DIFF_DUTY_LIMIT;
-    if((e > -DIFF_DEAD) && (e < DIFF_DEAD))  diff = 0;
-    duty_diff = diff;
-
-    diff2 = (int16)(DIFF_K * (float)e);
-    if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
-    if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    #endif
-    ===== ²îËÙÍ£ÓÃ½áÊø ===== */
-
-    diff      = 0;                      /* Á½ÂÖÍ¬ËÙ */
-    duty_diff = 0;
-    diff2     = 0;
-
-    /* ½öÔÚ DIFF_T_START ~ DIFF_T_END Ö®¼äÆôÓÃ²îËÙ£¨ËÙ¶È»·Ä¿±ê²îËÙ£© */
-    if(((run_tick >= DIFF_T_START)  && (run_tick < DIFF_T_END)) ||
-       ((run_tick >= DIFF_T2_START) && (run_tick < DIFF_T2_END)))
-    {
-        diff2 = (int16)(DIFF_K * (float)e);
-        if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
-        if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    }
-    /* Ã¿ÖÜÆÚÄ¿±êÂ·³Ì£¨Âö³å£© ¡ú ¼Ó²îËÙ·ÖÅä¸ø×óÓÒÂÖ */
-    tgt_per  = TARGET_SPEED_BASE;                      /* Ã¿ÖÜÆÚÄ¿±êÂ·³Ì£¨Âö³å£© */
-
-    target_l = (int16)(tgt_per - diff2);               /* E>0 ¡ú ×óÂÖ¿ì */
-    target_r = (int16)(tgt_per + diff2);               /* E>0 ¡ú ÓÒÂÖÂı */
-
-    /* ===== Ô²»·ÆÚ¼äÇ¿ÖÆÊ¹ÓÃÍäµÀ PID£¨»·±¾Éí¾ÍÊÇÍäµÀ£¬²»ÊÜ |error| ãĞÖµÓ°Ïì£© ===== */
-#if (ELEM_ENABLE == 1)
-    if((ELEM_ROUND_IN  == elem_state) ||
-       (ELEM_ROUND_ON  == elem_state) ||
-       (ELEM_ROUND_OUT == elem_state))
-    {
-        speed_slowed = 1;
-    }
-#endif
-
-    /* ===== ÍäµÀ PID ÒÑ×¢ÊÍ£¨Í£ÓÃ£©£ºÒ»ÂÉÊ¹ÓÃÖ±µÀ PID =====
-       speed_slowed ÈÔ»á¼ÆËã£¬µ«²»ÔÙÓ°Ïì PID ²ÎÊı
-    #if 0
-    if(speed_slowed != pid_state_prev)
-    {
-        servo_pid.integral = 0;
-        pid_state_prev     = speed_slowed;
-    }
-
-    if(1 == speed_slowed)
-    {
-        servo_pid.kp = KP_CURVE;
-        servo_pid.ki = KI_CURVE;
-        servo_pid.kd = KD_CURVE;
-    }
-    else
-    {
-        servo_pid.kp = SERVO_KP;
-        servo_pid.ki = SERVO_KI;
-        servo_pid.kd = SERVO_KD;
-    }
-    #endif
-    ===== ÍäµÀ PID ×¢ÊÍ½áÊø ===== */
-
-    servo_pid.kp = SERVO_KP;
-    servo_pid.ki = SERVO_KI;
-    servo_pid.kd = SERVO_KD;
-    return SPEED_STRAIGHT;             /* ¿ª»·Ê±¹Ì¶¨ÂúÕ¼¿Õ±È£¨²»ÔÙ¼õËÙ£© */
 }
