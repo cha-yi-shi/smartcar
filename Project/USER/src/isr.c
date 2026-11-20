@@ -207,6 +207,16 @@ void TM4_Isr() interrupt 20
     servo_pid.kd = SERVO_KD;
 #endif
 
+    /* ===== 三段差速窗口内：换用专用方向环 PID ===== */
+    if(((run_tick >= DIFF_T_START)  && (run_tick < DIFF_T_END))  ||
+       ((run_tick >= DIFF_T2_START) && (run_tick < DIFF_T2_END)) ||
+       ((run_tick >= DIFF_T3_START) && (run_tick < DIFF_T3_END)))
+    {
+        servo_pid.kp = DIFF_PID_KP;
+        servo_pid.ki = DIFF_PID_KI;
+        servo_pid.kd = DIFF_PID_KD;
+    }
+
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
 
