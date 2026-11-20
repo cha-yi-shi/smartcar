@@ -45,9 +45,9 @@
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        2.6f
+#define SERVO_KP        4.9f
 #define SERVO_KI        0.0f
-#define SERVO_KD        7.0f
+#define SERVO_KD        9.0f
 #define SERVO_MAX_I     100.0f
 #define SERVO_MAX_OUT   400.0f
 

@@ -330,15 +330,9 @@ int16 speed_decide(int16 e)
     duty_diff = 0;
     diff2     = 0;
 
-    /* 三段差速窗口：任一段命中就给差速（时间由 DIFF_T*_START/END 决定） */
-    if(((run_tick >= DIFF_T_START)  && (run_tick < DIFF_T_END))  ||
-       ((run_tick >= DIFF_T2_START) && (run_tick < DIFF_T2_END)) ||
-       ((run_tick >= DIFF_T3_START) && (run_tick < DIFF_T3_END)))
-    {
-        diff2 = (int16)(DIFF_K * (float)e);
-        if(diff2 >  DIFF_LIMIT)  diff2 =  DIFF_LIMIT;
-        if(diff2 < -DIFF_LIMIT)  diff2 = -DIFF_LIMIT;
-    }
+    /* ===== 三段窗口：只切换方向环 PID，不加差速 =====
+       差速已按你要求去掉，diff2 恒为 0（两轮同速）
+       窗口只影响 isr.c 里的 servo_pid.kp/ki/kd 选择 */
     /* 每周期目标路程（脉冲） → 加差速分配给左右轮 */
     tgt_per  = TARGET_SPEED_BASE;                      /* 每周期目标路程（脉冲） */
 
