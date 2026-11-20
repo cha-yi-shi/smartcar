@@ -213,8 +213,8 @@ void TM4_Isr() interrupt 20
 
     /* ===== 圆环开环：到点强制左打，之后交回差比和 ===== */
     #if (RING_FORCE_ENABLE == 1)
-    if((run_tick >= force_start_tick) &&
-       (run_tick <  (force_start_tick + FORCE_TIME_TICK)))
+    if((run_tick >= FORCE_START_TICK) &&
+       (run_tick <  (FORCE_START_TICK + FORCE_TIME_TICK)))
     {
         Set_Servo_PWM((int32)FORCE_DUTY);
     }
