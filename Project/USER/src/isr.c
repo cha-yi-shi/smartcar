@@ -128,6 +128,7 @@ void TM4_Isr() interrupt 20
 {
     int16  tl, tr, sl, sr, dl, dr;
     int16  out;
+    int16  ead;
 
     TIM4_CLEAR_FLAG;                        /* 清除中断标志 */
 
@@ -160,12 +161,12 @@ void TM4_Isr() interrupt 20
 
     Positional_PID_Calc(&servo_pid, 0.0f, (float)err_in);
 
-    /* 输入死区：|error*K| 太小就不打角（直道防抖；无死区补偿） */
-    if((err_in > -(int16)E_DEAD) && (err_in < (int16)E_DEAD))
+    /* 输入死区（自适应）：直道死区大（不打角），弯道死区自动缩小到 0 */
+    ead = (int16)(E_DEAD * (1.0f - curv));
+    if((err_in > -ead) && (err_in < ead))
     {
         servo_pid.output = 0.0f;
     }
-
     out = (int16)servo_pid.output;
 
     if(out >  (int16)SERVO_MAX_OUT) out =  (int16)SERVO_MAX_OUT;
