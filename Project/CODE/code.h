@@ -45,9 +45,9 @@
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
 /* 调舵机中位时：把 SERVO_KP 改成 0，舵机就会固定停在 SERVO_MID */
-#define SERVO_KP        3.9f
+#define SERVO_KP        2.5f
 #define SERVO_KI        0.0f
-#define SERVO_KD        7.0f
+#define SERVO_KD        8.0f
 #define SERVO_MAX_I     100.0f
 #define SERVO_MAX_OUT   400.0f
 
@@ -72,7 +72,7 @@
 #define DIFF_DEAD          20     /* ?? 差速死区：|error| < 10 不做差速，保证直道满速 */
 
 /* 速度环用的差速（脉冲单位，加在速度环目标值上） */
-#define DIFF_K              0.02f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
+#define DIFF_K              0.03f  /* ?? 速度环差速系数（脉冲单位）：error 50 → 1 个脉冲 */
 #define DIFF_LIMIT          2       /* ?? 速度环差速上限：最多差 2 个脉冲（约 27%） */
 /* #define SPEED_CURVE -8000 --- 入弯减速已取消，改为两轮差速（差速给在速度环 PID 里） */
 
@@ -117,10 +117,10 @@
 extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 
 /*------------------- 圆环开环：按时间强制打角 -------------------*/
-#define RING_FORCE_ENABLE    0     /* 测试版：无环岛 */
+#define RING_FORCE_ENABLE    1     /* 测试版：无环岛 */
 
 
-#define FORCE_START_TICK   910     /* ?? 910×5ms = 4.55 秒 开始进环 */
+#define FORCE_START_TICK   960     /* ?? 910×5ms = 4.55 秒 开始进环 */
 #define FORCE_TIME_TICK    300     /* ?? 300×5ms = 1.5 秒 强制打角时长 */
 #define FORCE_DUTY         350     /* ?? 打角 duty（650=中位，越小越左） */
 #define FORCE_OUT_START    590     /* 开始出环 (环内时间)（0543）*/
@@ -128,9 +128,9 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define FORCE_OUT_DUTY     550     /* ?? 出环duty（650=中位，越大越右） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/
-#define RING_PID_ENABLE      0     /* 测试版：无环岛独立PID */
-#define RING_ACTIVE_START   910    /* ?? 4.55 秒进入圆环段 */
-#define RING_ACTIVE_END    1600    /* ?? 8.0 秒离开圆环段 */
+#define RING_PID_ENABLE      1     /* 测试版：无环岛独立PID */
+#define RING_ACTIVE_START   960    /* ?? 4.55 秒进入圆环段 */
+#define RING_ACTIVE_END    1650    /* ?? 8.0 秒离开圆环段 */
 #define RING_KP             7.0f   /* ?? 圆环专用 KP */
 #define RING_KI             0.0f
 #define RING_KD             1.0f
