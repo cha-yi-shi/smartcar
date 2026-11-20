@@ -53,6 +53,23 @@
 
 /* 弯道专用 PID（直道用上面的 SERVO_KP/KI/KD） */
 #define KP_CURVE        3.5f    /* ?? 弯道 Kp（直道 2.5 的 1.4 倍，弯道打角更狠） */
+
+/*============ 弯道状态机（用原始竖向电感和 raw_ly+raw_ry）============*/
+/* 实测：直道 10~50，弯道 500~2000，十字 ~6000 */
+#define CURVE_V_ON       200     /* ?? Sv > 200  → 可能是弯道 */
+#define CURVE_V_MAX     4000     /* ?? Sv ≥ 4000 → 十字，永不算弯道（不打角）*/
+#define CURVE_V_OFF      120     /* ?? Sv < 120  → 可出弯（滞回 80）*/
+#define CURVE_E_ON        30     /* ?? |error| > 30 → 也可进弯（兜底）*/
+#define CURVE_E_OFF       15     /* ?? |error| < 15 才可出弯 */
+#define CURVE_IN_CNT       3     /* ?? 连续 3 拍（15ms）才进弯 */
+#define CURVE_OUT_CNT     20     /* ?? 连续 20 拍（100ms）才出弯 */
+
+/* 方向环 KP：直道 / 弯道 */
+#define SERVO_KP_STRAIGHT  1.0f  /* ?? 直道 KP */
+#define SERVO_KP_CURVE     4.0f  /* ?? 弯道 KP */
+
+extern volatile uint8 curve_flag;   /* 0 = 直道  1 = 弯道 */
+void curve_check(void);
 #define KI_CURVE        0.0f
 #define KD_CURVE        4.0f
 

@@ -181,6 +181,9 @@ void TM4_Isr() interrupt 20
     elem_check(lh, rh, lv, rv);                   /* 圆环：四路和触发 */
     error = elem_correct(error);
 
+    /* ③-b 弯道状态机：用原始竖向电感和 + 横向偏差判定直道/弯道 */
+    curve_check();
+
 
     /* ③-c 直道 / 弯道 判定：同时决定 速度 和 用哪套 PID */
     speed_now = speed_decide(error);
@@ -206,6 +209,11 @@ void TM4_Isr() interrupt 20
     servo_pid.ki = SERVO_KI;
     servo_pid.kd = SERVO_KD;
 #endif
+
+    /* ===== 弯道状态机决定 KP：直道 1.0 / 弯道 4.0 ===== */
+    servo_pid.kp = (curve_flag ? SERVO_KP_CURVE : SERVO_KP_STRAIGHT);
+    servo_pid.ki = SERVO_KI;
+    servo_pid.kd = SERVO_KD;
 
     Positional_PID_Calc(&servo_pid, 0, (float)error);
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));

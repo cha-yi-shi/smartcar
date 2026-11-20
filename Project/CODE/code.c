@@ -21,6 +21,64 @@ int16  speed_l, speed_r;        /* 左右速度 */
 
 uint16 raw_lx, raw_rx, raw_ly, raw_ry;  /* 滤波后的原始值（屏幕显示用） */
 
+/*=================== 弯道状态机 ===================*/
+volatile uint8 curve_flag = 0;      /* 0 = 直道  1 = 弯道 */
+static uint16 curve_in_cnt  = 0;
+static uint16 curve_out_cnt = 0;
+
+/* 每 5ms 调用一次：用原始竖向电感和 + 横向偏差判定直道/弯道
+   交叉口竖向和可达 6000，用 CURVE_V_MAX(4000) 挡住，绝不打角 */
+void curve_check(void)
+{
+    uint16 sv;
+    uint16 ea;
+
+    sv = (uint16)(raw_ly + raw_ry);
+    ea = (uint16)((error >= 0) ? error : -error);
+
+    /* ① 十字：竖向超大 → 硬门限，一定不算弯道 */
+    if(sv >= CURVE_V_MAX)
+    {
+        curve_in_cnt  = 0;
+        curve_out_cnt = 0;
+        curve_flag    = 0;
+        return;
+    }
+
+    if(0 == curve_flag)
+    {
+        /* ② 直道 → 判断进弯 */
+        if((sv > CURVE_V_ON) || (ea > CURVE_E_ON))
+        {
+            if(++curve_in_cnt >= CURVE_IN_CNT)
+            {
+                curve_in_cnt  = 0;
+                curve_flag    = 1;
+            }
+        }
+        else
+        {
+            curve_in_cnt = 0;
+        }
+    }
+    else
+    {
+        /* ③ 弯道 → 判断出弯（滞回 + 计数）*/
+        if((sv < CURVE_V_OFF) && (ea < CURVE_E_OFF))
+        {
+            if(++curve_out_cnt >= CURVE_OUT_CNT)
+            {
+                curve_out_cnt = 0;
+                curve_flag    = 0;
+            }
+        }
+        else
+        {
+            curve_out_cnt = 0;
+        }
+    }
+}
+
 volatile elem_state_enum elem_state = ELEM_NONE;
 uint16 elem_timer = 0;          /* 当前状态的计时（单位 10ms） */
 uint8  elem_cnt   = 0;          /* 连续满足条件的周期数 */
