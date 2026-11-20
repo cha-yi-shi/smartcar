@@ -1,5 +1,4 @@
 #include "key.h"
-#include "code.h"
 
 int key_cnt1,key_cnt2,key_cnt3,key_cnt4;
 
@@ -27,10 +26,6 @@ uint8 key_get_value(uint8 i)
     case 3:
         return key_4;
         break;
-    case 4:
-        return key_5;
-    case 5:
-        return key_6;
     default:
         return 1;
         break;
@@ -206,12 +201,6 @@ void key_action(void)
                 break;
             case 3:
 				key_cnt4++;
-                break;
-            case 4:                  /* P3.2 短按：进环时间 +10 */
-                if(force_start_tick < 60000) force_start_tick += KEY_STEP_TICK;
-                break;
-            case 5:                  /* P3.3 短按：进环时间 -10 */
-                if(force_start_tick > KEY_STEP_TICK) force_start_tick -= KEY_STEP_TICK;
                 break;
             default:
                 break;

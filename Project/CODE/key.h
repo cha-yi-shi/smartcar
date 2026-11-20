@@ -4,10 +4,10 @@
 #include "headfile.h"
 #include "encoder.h"
 
-#define KEY_NUMBER 6 // 按键数目（P7.0~P7.3 + P3.2/P3.3）
+#define KEY_NUMBER 4 // 按键数目
 #define KEY_PINS               \
     {                          \
-        P7_0, P7_1, P7_2, P7_3, P3_2, P3_3 \
+        P7_0, P7_1, P7_2, P7_3 \
     } // 按键对应引脚
 	
 extern int key_cnt1,key_cnt2,key_cnt3,key_cnt4;
@@ -17,11 +17,7 @@ sbit key_2 = P7 ^ 1;
 sbit key_3 = P7 ^ 2;
 sbit key_4 = P7 ^ 3;
 
-sbit key_5 = P3 ^ 2;      /* 短按：进环时间 +10 tick */
-sbit key_6 = P3 ^ 3;      /* 短按：进环时间 -10 tick */
 
-#define KEY_STEP_TICK 10   /* 每次按键调整的 tick 数（5ms/tick → 10 = 50ms）*/
-extern volatile uint16 force_start_tick;   /* 运行时可调的进环时刻 */
 
 #define PRESS_THRESHOLD 10     // 按键消抖阈值
 #define HOLD_THRESHOLD 300     // 按键长按阈值
