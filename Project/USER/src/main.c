@@ -108,7 +108,7 @@ void main()
         sprintf(txt,"N:%d %d %d %d      ",lh,rh,lv,rv);
         lcd_showstr(0,6,(int8 *)txt);
 
-        sprintf(txt,"E:%d D:%d       ",error,(int16)(SERVO_MID + servo_pid.output));
+        sprintf(txt,"T:%d E:%d      ",force_start_tick,error);
         lcd_showstr(0,7,(int8 *)txt);
 
         sprintf(txt,"D:%d V:%d      ",duty_diff,speed_now);
