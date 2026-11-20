@@ -40,7 +40,7 @@
 #define TARGET_SPEED_DEFAULT    0       /* ?? 闭环目标速度（脉冲/10ms） */
 
 #define SPEED_LOOP_ENABLE       1       /* 0 = 开环，占空比固定 -10000（用于标定测量） */
-#define LCD_DEBUG               0       /* ?? 0 = 关闭屏幕打印（提速，不占用主循环） 1 = 打开 */
+#define LCD_DEBUG               1       /* ?? 0 = 关闭屏幕打印（提速，不占用主循环） 1 = 打开 */
 #define ELEM_ENABLE             0       /* 0 = 圆环闭环关闭，改按时间开环进环 */
 
 /*----------------------------- 方向环 PID（L4 4.8） -----------------------------*/
@@ -50,6 +50,9 @@
 #define SERVO_KD        7.0f
 #define SERVO_MAX_I     100.0f
 #define SERVO_MAX_OUT   400.0f
+
+/* 直道防抖死区：PID 输出绝对值小于它就当作 0（不打角）*/
+#define SERVO_DEAD      40.0f   /* ?? 死区（duty 单位，40 ≈ 8°）；直道画龙就加大 */
 
 /* 弯道专用 PID（直道用上面的 SERVO_KP/KI/KD） */
 #define KP_CURVE        3.5f    /* ?? 弯道 Kp（直道 2.5 的 1.4 倍，弯道打角更狠） */
@@ -124,7 +127,7 @@ extern uint16 run_tick;         /* 上电后经过的 10ms 数（定义在 code.c） */
 #define FORCE_TIME_TICK    300     /* ?? 240×5ms = 1200 毫秒 强制左打时长 */
 #define FORCE_DUTY         350     /* ?? 打角 duty（650=中位，越小越左） */
 #define FORCE_OUT_START    590     /* 开始出环 (环内时间)（0543）*/
-#define FORCE_OUT_TIME       0     /* ?? 160×5ms = 0.8 秒 出环时长 */
+#define FORCE_OUT_TIME     160     /* ?? 160×5ms = 0.8 秒 出环时长 */
 #define FORCE_OUT_DUTY     550     /* ?? 出环duty（650=中位，越大越右） */
 
 /*------------ 圆环专用：独立 PID（KP=4）+ 电机固定占空比 ------------*/

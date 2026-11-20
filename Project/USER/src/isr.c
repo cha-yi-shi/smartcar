@@ -208,6 +208,12 @@ void TM4_Isr() interrupt 20
 #endif
 
     Positional_PID_Calc(&servo_pid, 0, (float)error);
+
+    /* ===== 直道防抖死区：输出太小就不打角，避免直道画龙 ===== */
+    if((servo_pid.output > -SERVO_DEAD) && (servo_pid.output < SERVO_DEAD))
+    {
+        servo_pid.output = 0.0f;
+    }
     Set_Servo_PWM((int32)(SERVO_MID + servo_pid.output));
 
 
